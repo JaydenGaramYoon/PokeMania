@@ -1,0 +1,409 @@
+// import React, { useState, useEffect } from 'react';
+// import { Link } from 'react-router-dom';
+// import './Home.css';
+
+// const Home = () => {
+//     const [pokemonInfos, setPokemonInfos] = useState([]);
+//     const [searchInput, setSearchInput] = useState('');
+//     const [isLoading, setIsLoading] = useState(false);
+//     const [showModal, setShowModal] = useState(false);
+//     const [modalContent, setModalContent] = useState(null);
+//     const [favourites, setFavourites] = useState([]);
+
+//     useEffect(() => {
+//         // Load favourites from localStorage
+//         const storedFavourites = Object.keys(localStorage).map(key => JSON.parse(localStorage.getItem(key)));
+//         setFavourites(storedFavourites);
+//     }, []);
+
+//     const handleSearch = async () => {
+//         if (!searchInput) return;
+
+//         setIsLoading(true);
+//         const url = `https://pokeapi.co/api/v2/pokemon/${searchInput.toLowerCase()}`;
+
+//         try {
+//             const response = await fetch(url);
+//             if (response.status === 404) {
+//                 throw new Error('Pokémon not found');
+//             }
+
+//             const data = await response.json();
+//             const newPokemon = {
+//                 id: data.id,
+//                 abilities: data.abilities,
+//                 height: data.height,
+//                 weight: data.weight,
+//                 types: data.types.map(type => type.type.name),
+//                 name: data.name,
+//                 image: data.sprites.other['official-artwork'].front_default,
+//                 hp: data.stats[0].base_stat,
+//                 attack: data.stats[1].base_stat,
+//                 defense: data.stats[2].base_stat,
+//                 specialAttack: data.stats[3].base_stat,
+//                 specialDefense: data.stats[4].base_stat,
+//                 speed: data.stats[5].base_stat,
+//             };
+//             setPokemonInfos([newPokemon]);
+//         } catch (error) {
+//             console.error(error);
+//         } finally {
+//             setIsLoading(false);
+//         }
+//     };
+
+//     const handleAddToFavourites = (pokemon) => {
+//         if (localStorage.getItem(pokemon.id)) {
+//             alert("Already in favourites!");
+//             return;
+//         }
+//         localStorage.setItem(pokemon.id, JSON.stringify(pokemon));
+//         setFavourites(prevFavourites => [...prevFavourites, pokemon]);
+//         alert(`${pokemon.name} added to favourites!`);
+//     };
+
+
+//     const handleModalOpen = (pokemon) => {
+//         setModalContent(pokemon);
+//         setShowModal(true);
+//     };
+
+//     const handleModalClose = () => {
+//         setShowModal(false);
+//     };
+
+//     return (
+
+//         <>
+//             <div className="search-area">
+//                 <input
+//                     type="text"
+//                     id="search-input"
+//                     value={searchInput}
+//                     placeholder='Search Pokémon by name or ID...'
+//                     onChange={(e) => setSearchInput(e.target.value)}
+//                 />
+//                 <button id="search-button" onClick={handleSearch} disabled={isLoading}>
+//                     <img
+//                         src="/images/search.png"
+//                         alt="Search"
+//                         style={{ width: '24px', height: '24px', verticalAlign: 'middle' }}
+//                     />
+//                 </button>
+//             </div>
+
+//             {/* 로딩 상태 표시 */}
+//             {isLoading && (
+//                 <div style={{ textAlign: 'center', margin: '32px 0' }}>
+//                     <img
+//                         src="/images/loading.webp"
+//                         alt="Loading"
+//                         className="spinner"
+//                         style={{ width: '24px', height: '24px', verticalAlign: 'middle' }}
+//                     />
+//                 </div>
+//             )}
+
+//             {/* 결과 표시 */}
+//             {!isLoading && (
+//                 <div id="pokemon-details">
+//                     {pokemonInfos.length === 0 && searchInput && (
+//                         <div style={{ textAlign: 'center', color: '#e53935', fontWeight: 600, marginTop: 24, fontSize: 18 }}>
+//                             ❌ Pokémon not found.
+//                         </div>
+//                     )}
+//                     {pokemonInfos.map(pokemon => (
+//                         <div key={pokemon.id} className="pokemon-card">
+//                             <h2>{pokemon.name}</h2>
+//                             <img src={pokemon.image} alt={pokemon.name} />
+//                             <p>ID: {pokemon.id}</p>
+//                             <p>Types: {pokemon.types.join(', ')}</p>
+//                             <p>Abilities: {pokemon.abilities.map(ability => ability.ability.name).join(', ')}</p>
+//                             <p>Height: {pokemon.height}</p>
+//                             <p>Weight: {pokemon.weight}</p>
+//                             <button onClick={() => handleModalOpen(pokemon)}>More Info</button>
+//                             <button onClick={() => handleAddToFavourites(pokemon)}>⭐ Add to Favourites</button>
+//                         </div>
+//                     ))}
+//                 </div>
+//             )}
+
+//             {showModal && modalContent && (
+//                 <div id="pokemon-modal" className="modal">
+//                     <div id="modal-content" className="modal-content">
+//                         <h2>{modalContent.name}</h2>
+//                         <p>{modalContent.id}</p>
+//                         <img src={modalContent.image} alt={modalContent.name} />
+//                         <p>Height: {modalContent.height} m</p>
+//                         <p>Weight: {modalContent.weight} kg</p>
+//                         <p>Abilities: {modalContent.abilities.map(ability => ability.ability.name).join(', ')}</p>
+//                         <p>Stats: {`HP: ${modalContent.hp}, Attack: ${modalContent.attack}, Defense: ${modalContent.defense}, Special Attack: ${modalContent.specialAttack}, Special Defense: ${modalContent.specialDefense}, Speed: ${modalContent.speed}`}</p>
+//                         <button id="close-modal" onClick={handleModalClose}>Close</button>
+//                     </div>
+//                 </div>
+//             )}
+//         </>
+//         // <>
+//         //     <div className="search-area">
+//         //         <input
+//         //             type="text"
+//         //             id="search-input"
+//         //             value={searchInput}
+//         //             placeholder='Search Pokémon by name or ID...'
+//         //             onChange={(e) => setSearchInput(e.target.value)}
+//         //         />
+//         //         <button id="search-button" onClick={handleSearch} disabled={isLoading}>
+//         //             {isLoading ?  (
+//         //                 <img
+//         //                     src="/images/loading.webp"
+//         //                     alt="Loading"
+//         //                     className="spinner"
+//         //                     style={{ width: '24px', height: '24px', verticalAlign: 'middle' }}
+//         //                 />
+//         //             ) : (
+//         //                 <img
+//         //                     src="/images/search.png"
+//         //                     alt="Search"
+//         //                     style={{ width: '24px', height: '24px', verticalAlign: 'middle' }}
+//         //                 />
+//         //             )}
+//         //         </button>
+//         //     </div>
+
+//         //     <div id="pokemon-details">
+//         //         {pokemonInfos.map(pokemon => (
+//         //             <div key={pokemon.id} className="pokemon-card">
+//         //                 <h2>{pokemon.name}</h2>
+//         //                 <img src={pokemon.image} alt={pokemon.name} />
+//         //                 <p>ID: {pokemon.id}</p>
+//         //                 <p>Types: {pokemon.types.join(', ')}</p>
+//         //                 <p>Abilities: {pokemon.abilities.map(ability => ability.ability.name).join(', ')}</p>
+//         //                 <p>Height: {pokemon.height}</p>
+//         //                 <p>Weight: {pokemon.weight}</p>
+//         //                 <button onClick={() => handleModalOpen(pokemon)}>More Info</button>
+//         //                 <button onClick={() => handleAddToFavourites(pokemon)}>⭐ Add to Favourites</button>
+//         //             </div>
+//         //         ))}
+//         //     </div>
+
+//         //     {showModal && modalContent && (
+//         //         <div id="pokemon-modal" className="modal">
+//         //             <div id="modal-content" className="modal-content">
+//         //                 <h2>{modalContent.name}</h2>
+//         //                 <p>{modalContent.id}</p>
+//         //                 <img src={modalContent.image} alt={modalContent.name} />
+//         //                 <p>Height: {modalContent.height} m</p>
+//         //                 <p>Weight: {modalContent.weight} kg</p>
+//         //                 <p>Abilities: {modalContent.abilities.map(ability => ability.ability.name).join(', ')}</p>
+//         //                 <p>Stats: {`HP: ${modalContent.hp}, Attack: ${modalContent.attack}, Defense: ${modalContent.defense}, Special Attack: ${modalContent.specialAttack}, Special Defense: ${modalContent.specialDefense}, Speed: ${modalContent.speed}`}</p>
+//         //                 <button id="close-modal" onClick={handleModalClose}>Close</button>
+//         //             </div>
+//         //         </div>
+//         //     )}
+//         // </>
+//     );
+// };
+
+// export default Home;
+
+import React, { useState, useEffect } from 'react';
+import './Home.css';
+
+const Home = () => {
+    const [pokemonInfos, setPokemonInfos] = useState([]);
+    const [searchInput, setSearchInput] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [showModal, setShowModal] = useState(false);
+    const [modalContent, setModalContent] = useState(null);
+    const [favourites, setFavourites] = useState([]);
+    const [errorMessage, setErrorMessage] = useState('');
+
+    useEffect(() => {
+        // Load favourites from localStorage
+        const storedFavourites = Object.keys(localStorage).map(key => JSON.parse(localStorage.getItem(key)));
+        setFavourites(storedFavourites);
+    }, []);
+
+    const handleSearch = async () => {
+        if (!searchInput) return;
+
+        setIsLoading(true); // Show the spinner
+        setErrorMessage(''); // Clear previous error message
+        setPokemonInfos([]); // Clear previous Pokémon info
+
+        const url = `https://pokeapi.co/api/v2/pokemon/${searchInput.toLowerCase()}`;
+
+        try {
+            const response = await fetch(url);
+            if (response.status === 404) {
+                throw new Error('❌ Pokémon not found');
+            }
+
+            const data = await response.json();
+            const newPokemon = {
+                id: data.id,
+                abilities: data.abilities,
+                height: data.height,
+                weight: data.weight,
+                types: data.types.map(type => type.type.name),
+                name: data.name,
+                image: data.sprites.other['official-artwork'].front_default,
+                hp: data.stats[0].base_stat,
+                attack: data.stats[1].base_stat,
+                defense: data.stats[2].base_stat,
+                specialAttack: data.stats[3].base_stat,
+                specialDefense: data.stats[4].base_stat,
+                speed: data.stats[5].base_stat,
+            };
+            setPokemonInfos([newPokemon]);
+        } catch (error) {
+            setErrorMessage(error.message); // Set error message if Pokémon not found
+        } finally {
+            setIsLoading(false); // Hide the spinner when the loading is complete
+        }
+    };
+
+    const handleAddToFavourites = (pokemon) => {
+        if (localStorage.getItem(pokemon.id)) {
+            alert("Already in favourites!");
+            return;
+        }
+        localStorage.setItem(pokemon.id, JSON.stringify(pokemon));
+        setFavourites(prevFavourites => [...prevFavourites, pokemon]);
+        alert(`${pokemon.name} added to favourites!`);
+    };
+
+    const handleModalOpen = (pokemon) => {
+        setModalContent(pokemon);
+        setShowModal(true);
+    };
+
+    const handleModalClose = () => {
+        setShowModal(false);
+    };
+
+    return (
+        <>
+            <div className="search-area">
+                <input
+                    type="text"
+                    id="search-input"
+                    value={searchInput}
+                    placeholder='Search Pokémon by name or ID...'
+                    onChange={(e) => setSearchInput(e.target.value)}
+                    onKeyDown={e => {
+                        if (e.key === 'Enter') handleSearch();
+                    }}
+                />
+                <button id="search-button" onClick={handleSearch} disabled={isLoading}>
+                    <img
+                        src="/images/search.png"
+                        alt="Search"
+                        style={{ width: '24px', height: '24px', verticalAlign: 'middle' }}
+                    />
+                </button>
+            </div>
+
+            {/* Show the spinner while loading */}
+            {isLoading && (
+                <div style={{ textAlign: 'center', margin: '32px 0' }}>
+                    <img
+                        src="/images/loading.webp"
+                        alt="Loading"
+                        className="spinner"
+                        style={{ width: '24px', height: '24px', verticalAlign: 'middle' }}
+                    />
+                </div>
+            )}
+
+            {/* Show the Pokémon details or error message */}
+            {!isLoading && pokemonInfos.length === 0 && searchInput && errorMessage && (
+                <div style={{ textAlign: 'center', color: 'black', fontWeight: 400, marginTop: 24, fontSize: 15 }}>
+                    {errorMessage} {/* Display error message if Pokémon is not found */}
+                </div>
+            )}
+
+            {/* Display Pokémon card if found */}
+            {!isLoading && pokemonInfos.length > 0 && (
+                <div id="pokemon-details">
+                    {pokemonInfos.map(pokemon => (
+                        <div key={pokemon.id} className="pokemon-card">
+                            <h2>{pokemon.name}</h2>
+                            <img src={pokemon.image} alt={pokemon.name} />
+                            <p>ID: {pokemon.id}</p>
+                            <p>Types: {pokemon.types.join(', ')}</p>
+                            <p>Abilities: {pokemon.abilities.map(ability => ability.ability.name).join(', ')}</p>
+                            <p>Height: {pokemon.height}</p>
+                            <p>Weight: {pokemon.weight}</p>
+                            <button onClick={() => handleModalOpen(pokemon)}>More Info</button>
+                            <button onClick={() => handleAddToFavourites(pokemon)}>⭐ Add to Favourites</button>
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            {showModal && modalContent && (
+                <div id="pokemon-modal" className="modal"
+                    onClick={e => {
+                        // modal-content 바깥을 클릭하면 닫기
+                        if (e.target.id === "pokemon-modal") handleModalClose();
+                    }}
+                >
+                    <div id="modal-content" className="modal-content">
+                        <span id="close-modal" className="close" onClick={handleModalClose}>&times;</span>
+                        <div className="modal-header">
+                            <h2 id="modal-name">{modalContent.name}</h2>
+                            <span className="modal-id" id="modal-id">#{modalContent.id}</span>
+                        </div>
+                        <div className="modal-image-container">
+                            <img
+                                id="modal-img"
+                                src={modalContent.image}
+                                alt="Pokemon Image"
+                            />
+                        </div>
+                        <div className="modal-info">
+                            <div className="modal-types" id="modal-types">
+                                <h3>Types</h3>
+                                <div className="types-container">
+                                    {modalContent.types.map(type => (
+                                        <span key={type} className={`type-badge type-${type}`}>
+                                            {type}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="modal-basic-info">
+                                <div className="info-column">
+                                    <p id="modal-height">Height: {modalContent.height} m</p>
+                                    <p id="modal-weight">Weight: {modalContent.weight} kg</p>
+                                </div>
+                                <div className="info-column">
+                                    <p id="modal-abilities">
+                                        Abilities:<br />
+                                        <span>
+                                            {modalContent.abilities.map(a => a.ability.name).join(', ')}
+                                        </span>
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="modal-stats-container">
+                                <h3>Base Stats</h3>
+                                <div id="modal-stats" className="stats-grid">
+                                    <div>hp: {modalContent.hp}</div>
+                                    <div>attack: {modalContent.attack}</div>
+                                    <div>defense: {modalContent.defense}</div>
+                                    <div>special-attack: {modalContent.specialAttack}</div>
+                                    <div>special-defense: {modalContent.specialDefense}</div>
+                                    <div>speed: {modalContent.speed}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </>
+    );
+};
+
+export default Home;
