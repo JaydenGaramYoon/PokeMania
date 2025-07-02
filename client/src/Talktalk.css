@@ -1,3 +1,10 @@
+@font-face {
+    font-family: 'Pokemon Solid';
+    src: url('/fonts/Pokemon-Solid.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
 html, body {
   margin: 0;
   padding: 0;
@@ -27,10 +34,10 @@ html, body {
 
 .chat-title {
   text-align: center;
-  color: #2a2e49;
-  font-family: 'Quicksand', sans-serif;
+  color: #000000;
+  font-family: 'Pokemon Solid', sans-serif;
   font-weight: 600;
-  font-size: 2.2rem;
+  font-size: 2rem;
   background: rgba(255, 255, 255, 0.85);
   padding: 10px 24px;
   border-radius: 16px;
@@ -40,7 +47,7 @@ html, body {
   gap: 10px;
   margin: 0 auto 20px auto;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  letter-spacing: 0.5px;
+  letter-spacing: 3px;
 }
 
 .chat-logo {
