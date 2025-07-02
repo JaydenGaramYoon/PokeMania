@@ -96,6 +96,7 @@ a:hover {
     align-items: center;
     gap: 3rem;
     flex: 1;
+    justify-content: space-evenly; /* 링크를 같은 간격으로 배치 */
 }
 
 .nav-link {
