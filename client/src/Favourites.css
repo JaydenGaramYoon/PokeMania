@@ -3,6 +3,7 @@
     0% {
         transform: translateX(-200%) skewX(-25deg);
     }
+
     100% {
         transform: translateX(200%) skewX(-25deg);
     }
@@ -10,8 +11,22 @@
 
 /* 카드 컨테이너 설정 */
 .favourites-page .pokemon-card {
-    position: relative; /* 가상 요소 위치의 기준점 */
-    overflow: hidden;   /* 카드를 벗어나는 효과 숨기기 */
+    position: relative;
+    /* 가상 요소 위치의 기준점 */
+    overflow: hidden;
+    /* 카드를 벗어나는 효과 숨기기 */
+}
+
+.pokemon-card h2{
+    font-family: "Pokemon Solid", sans-serif;
+    /* 폰트 설정 */
+    font-size: 2rem;
+    /* 제목 크기 */
+    color: var(--dark-text);
+    /* 어두운 텍스트 색상 */
+    margin: 10px 0;
+    /* 제목 위아래 여백 */
+    letter-spacing: 3px;
 }
 
 .card-container {
@@ -30,14 +45,14 @@
     left: 0;
     width: 50%;
     height: 100%;
-    background: linear-gradient(
-        to right,
-        rgba(255, 255, 255, 0) 0%,
-        rgba(255, 255, 255, 0.4) 50%,
-        rgba(255, 255, 255, 0) 100%
-    );
-    transform: translateX(-200%) skewX(-25deg); /* 시작 위치 (왼쪽 밖) */
-    animation: shine-effect 3s infinite 1s; /* 3초 동안 애니메이션, 1초 후 시작, 무한 반복 */
+    background: linear-gradient(to right,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, 0.4) 50%,
+            rgba(255, 255, 255, 0) 100%);
+    transform: translateX(-200%) skewX(-25deg);
+    /* 시작 위치 (왼쪽 밖) */
+    animation: shine-effect 3s infinite 1s;
+    /* 3초 동안 애니메이션, 1초 후 시작, 무한 반복 */
 }
 
 .favourites-page {
@@ -56,10 +71,12 @@
     font-family: "Pokemon Solid", sans-serif;
     font-size: 3rem;
     color: var(--dark-text);
+    letter-spacing: 3px;
 }
 
 .remove-button {
-    background-color: #ff3d3d; /* Red color for removal */
+    background-color: #ff3d3d;
+    /* Red color for removal */
     color: #ffffff;
     padding: 10px 20px;
     border: none;
@@ -71,7 +88,8 @@
 }
 
 .remove-button:hover {
-    background-color: #cc0000; /* Darker red on hover */
+    background-color: #cc0000;
+    /* Darker red on hover */
 }
 
 .no-favourites-message {

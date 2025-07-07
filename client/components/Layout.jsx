@@ -13,13 +13,13 @@ export default function Layout() {
                         </Link>
                     </div>
                     <div className="nav-links">
-                        <Link to="/" className="nav-link">Search</Link>
                         <Link to="/favourites" className="nav-link">Favourites</Link>
-                        <Link to="/" className="nav-link">Game</Link>
-                        <Link to="/" className="nav-link">TalkTalk</Link>
-                        <Link to="/" className="nav-link">
+                        <Link to="/game" className="nav-link">Game</Link>
+                        <Link to="/talktalk" className="nav-link">TalkTalk</Link>
+                        <Link to="/profile" className="nav-link">
                             <img src="/images/profile.png" alt="profile" />
                         </Link>
+
                     </div>
                 </div>
             </nav>
