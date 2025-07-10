@@ -219,8 +219,17 @@ const Home = () => {
     const [errorMessage, setErrorMessage] = useState('');
 
     useEffect(() => {
-        // Load favourites from localStorage
-        const storedFavourites = Object.keys(localStorage).map(key => JSON.parse(localStorage.getItem(key)));
+        // pokemon_으로 시작하는 키만 파싱
+        const storedFavourites = Object.keys(localStorage)
+            .filter(key => key.startsWith('pokemon_'))
+            .map(key => {
+                try {
+                    return JSON.parse(localStorage.getItem(key));
+                } catch {
+                    return null;
+                }
+            })
+            .filter(Boolean);
         setFavourites(storedFavourites);
     }, []);
 
@@ -264,11 +273,12 @@ const Home = () => {
     };
 
     const handleAddToFavourites = (pokemon) => {
-        if (localStorage.getItem(pokemon.id)) {
+        const key = `pokemon_${pokemon.id}`; // pokemon_ prefix 사용
+        if (localStorage.getItem(key)) {
             alert("Already in favourites!");
             return;
         }
-        localStorage.setItem(pokemon.id, JSON.stringify(pokemon));
+        localStorage.setItem(key, JSON.stringify(pokemon));
         setFavourites(prevFavourites => [...prevFavourites, pokemon]);
         alert(`${pokemon.name} added to favourites!`);
     };

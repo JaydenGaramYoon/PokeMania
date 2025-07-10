@@ -5,16 +5,23 @@ const Favourites = () => {
     const [favourites, setFavourites] = useState([]);
 
     useEffect(() => {
-        // Load favourites from localStorage on component mount
+        // pokemon_으로 시작하는 키만 파싱
         const storedFavourites = Object.keys(localStorage)
-            .filter(key => !isNaN(key)) // Ensure we only get pokemon ids
-            .map(key => JSON.parse(localStorage.getItem(key)));
+            .filter(key => key.startsWith('pokemon_')) // pokemon_으로 시작하는 키만
+            .map(key => {
+                try {
+                    return JSON.parse(localStorage.getItem(key));
+                } catch {
+                    return null;
+                }
+            })
+            .filter(Boolean);
         setFavourites(storedFavourites);
     }, []);
 
     const handleRemoveFavourite = (pokemonId) => {
-        // Remove from localStorage
-        localStorage.removeItem(pokemonId);
+        // Remove from localStorage (prefix 포함)
+        localStorage.removeItem(`pokemon_${pokemonId}`);
         // Update state to re-render the component
         setFavourites(prevFavourites => prevFavourites.filter(p => p.id !== pokemonId));
         alert('Removed from Poké Box!');
@@ -31,8 +38,8 @@ const Favourites = () => {
                             <img src={pokemon.image} alt={pokemon.name} />
                             <p>ID: {pokemon.id}</p>
                             <p>Types: {pokemon.types.join(', ')}</p>
-                            <button 
-                                className="remove-button" 
+                            <button
+                                className="remove-button"
                                 onClick={() => handleRemoveFavourite(pokemon.id)}
                             >
                                 Remove
