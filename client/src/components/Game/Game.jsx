@@ -34,11 +34,11 @@ const Game = () => {
 
     // 오디오 초기화
     useEffect(() => {
-        clickSound.current = new window.Audio('sounds/click.mp3');
-        successSound.current = new window.Audio('sounds/success.mp3');
-        failSound.current = new window.Audio('sounds/fail.mp3');
-        openingSound.current = new window.Audio('sounds/opening.mp3');
-        backgroundMusic.current = new window.Audio('sounds/background.mp3');
+        clickSound.current = new window.Audio('public/sounds/click.mp3');
+        successSound.current = new window.Audio('public/sounds/success.mp3');
+        failSound.current = new window.Audio('public/sounds/fail.mp3');
+        openingSound.current = new window.Audio('public/sounds/opening.mp3');
+        backgroundMusic.current = new window.Audio('public/sounds/background.mp3');
     }, []);
 
     // 페이지 이동 시 게임 종료 및 음악 정지 + 메시지 표시
@@ -52,7 +52,7 @@ const Game = () => {
             if (gameRunning) {
                 setGameRunning(false);
                 setGameOver(false);
-                setAutoEndMessage('게임이 자동 종료되었습니다.');
+                setAutoEndMessage('Game is automatically ended due to page navigation.');
             }
         }
         prevPath.current = location.pathname;
@@ -152,7 +152,6 @@ const Game = () => {
         if (openingSound.current) openingSound.current.pause();
 
         setScore(0);
-        setLevel(1);
         setCorrectGuesses(0);
         setGameOver(false);
         setGameRunning(true);
@@ -170,25 +169,37 @@ const Game = () => {
     };
 
     // 저장 버튼 클릭 시
-    const handleSaveScore = () => {
-        const now = new Date();
-        const dateString = now.toLocaleString();
-        setSavedDate(dateString);
+    const handleSaveScore = async () => {
+    const now = new Date();
+    const dateString = now.toLocaleString();
+    setSavedDate(dateString);
 
-        // 예시: localStorage에 저장
-        const record = {
-            score: finalScore,
-            correctGuesses,
-            date: dateString,
-        };
-        let records = JSON.parse(localStorage.getItem('gameRecords') || '[]');
-        records.push(record);
-        localStorage.setItem('gameRecords', JSON.stringify(records));
+    // userId는 로그인/세션 등에서 받아와야 함
+    localStorage.setItem('userId', '60f7c2b5e1b2c8a1b8e4d123');
+    const userId = localStorage.getItem('userId') || 'anonymous';
 
-        setSaveMessage('Score saved!');
-        setGameOver(false);
-        setGameRunning(false);
-    };
+    try {
+        const response = await fetch('/api/games', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                userId: userId,
+                score: finalScore,
+            }),
+        });
+        const data = await response.json();
+        if (response.ok) {
+            setSaveMessage('Score saved!');
+        } else {
+            setSaveMessage('Failed to save score: ' + (data.error || 'Unknown error'));
+        }
+    } catch (err) {
+        setSaveMessage('Failed to save score: ' + err.message);
+    }
+
+    setGameOver(false);
+    setGameRunning(false);
+};
 
     return (
         <div className="game-container" style={{ border: '2px solid #ccc', borderRadius: '12px' }}>
@@ -257,7 +268,7 @@ const Game = () => {
             ) : !gameRunning ? (
                 // Start Screen
                 <div id="startScreen">
-                    <div id = "startMessage">Guess The Pokémon!</div>
+                    <div id="startMessage">Guess The Pokémon!</div>
                     <button id="startButton" onClick={startGame}>Start Game</button>
                 </div>
             ) : (
