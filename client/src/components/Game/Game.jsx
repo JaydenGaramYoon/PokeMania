@@ -24,9 +24,6 @@ const Game = () => {
 
     // 오디오 객체는 useRef로 한 번만 생성
     const clickSound = useRef(null);
-    const successSound = useRef(null);
-    const failSound = useRef(null);
-    const openingSound = useRef(null);
     const backgroundMusic = useRef(null);
 
     const location = useLocation();
@@ -34,11 +31,8 @@ const Game = () => {
 
     // 오디오 초기화
     useEffect(() => {
-        clickSound.current = new window.Audio('sounds/click.mp3');
-        successSound.current = new window.Audio('sounds/success.mp3');
-        failSound.current = new window.Audio('sounds/fail.mp3');
-        openingSound.current = new window.Audio('sounds/opening.mp3');
-        backgroundMusic.current = new window.Audio('sounds/background.mp3');
+        clickSound.current = new window.Audio('/sounds/click.mp3');
+        backgroundMusic.current = new window.Audio('/sounds/background.mp3');
     }, []);
 
     // 페이지 이동 시 게임 종료 및 음악 정지 + 메시지 표시
@@ -52,7 +46,7 @@ const Game = () => {
             if (gameRunning) {
                 setGameRunning(false);
                 setGameOver(false);
-                setAutoEndMessage('게임이 자동 종료되었습니다.');
+                setAutoEndMessage('Game is automatically ended due to page navigation.');
             }
         }
         prevPath.current = location.pathname;
@@ -117,7 +111,6 @@ const Game = () => {
         clickSound.current && clickSound.current.play();
 
         if (guess.toLowerCase() === pokemonName.toLowerCase()) {
-            successSound.current && successSound.current.play();
             setScore((prevScore) => prevScore + 10);
             setCorrectGuesses((prevCorrectGuesses) => prevCorrectGuesses + 1);
             setShadowVisible(false);
@@ -125,7 +118,6 @@ const Game = () => {
                 levelUp();
             }, 1000);
         } else {
-            failSound.current && failSound.current.play();
             if (backgroundMusic.current) {
                 backgroundMusic.current.pause();
                 backgroundMusic.current.currentTime = 0;
@@ -149,10 +141,8 @@ const Game = () => {
             backgroundMusic.current.play();
             backgroundMusic.current.loop = true;
         }
-        if (openingSound.current) openingSound.current.pause();
 
         setScore(0);
-        setLevel(1);
         setCorrectGuesses(0);
         setGameOver(false);
         setGameRunning(true);
@@ -170,24 +160,55 @@ const Game = () => {
     };
 
     // 저장 버튼 클릭 시
-    const handleSaveScore = () => {
+    const handleSaveScore = async () => {
+        console.log('💾 Save button clicked');
         const now = new Date();
         const dateString = now.toLocaleString();
         setSavedDate(dateString);
 
-        // 예시: localStorage에 저장
-        const record = {
-            score: finalScore,
-            correctGuesses,
-            date: dateString,
-        };
-        let records = JSON.parse(localStorage.getItem('gameRecords') || '[]');
-        records.push(record);
-        localStorage.setItem('gameRecords', JSON.stringify(records));
+        const userId = localStorage.getItem('userId_user') || 'anonymous';
+        console.log('✅ 시작: userId =', userId);
 
-        setSaveMessage('Score saved!');
-        setGameOver(false);
-        setGameRunning(false);
+        try {
+            const checkRes = await fetch(`/api/game/user/${userId}`);
+            if (!checkRes.ok) throw new Error('GET 요청 실패: ' + checkRes.status);
+
+            const userGames = await checkRes.json();
+            console.log('✅ 게임 데이터:', userGames);
+
+            const existingGame = userGames && userGames.length > 0 ? userGames[0] : null;
+
+            if (existingGame) {
+                console.log('✏️ 기존 게임 ID:', existingGame._id);
+                const updateRes = await fetch(`/api/game/${existingGame._id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ score: score }),
+                });
+                const updateData = await updateRes.json();
+                console.log('✅ 업데이트 응답:', updateData);
+                setSaveMessage('Score updated!');
+            } else {
+                console.log('🆕 새 게임 생성');
+                const createRes = await fetch('/api/game', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user: userId,
+                        score: score,
+                    }),
+                });
+                const createData = await createRes.json();
+                console.log('✅ 생성 응답:', createData);
+                setSaveMessage('Score saved!');
+            }
+
+            setGameOver(false);
+            setGameRunning(false);
+        } catch (err) {
+            console.log('❌ 에러 발생:', err);
+            setSaveMessage('Failed to save score: ' + err.message);
+        }
     };
 
     return (
@@ -257,7 +278,7 @@ const Game = () => {
             ) : !gameRunning ? (
                 // Start Screen
                 <div id="startScreen">
-                    <div id = "startMessage">Guess The Pokémon!</div>
+                    <div id="startMessage">Guess The Pokémon!</div>
                     <button id="startButton" onClick={startGame}>Start Game</button>
                 </div>
             ) : (
