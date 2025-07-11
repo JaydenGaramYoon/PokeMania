@@ -4,8 +4,6 @@ import './game.css';
 
 const Game = () => {
     const [score, setScore] = useState(0);
-    const [level, setLevel] = useState(1);
-    const [correctGuesses, setCorrectGuesses] = useState(0);
     const [pokemon, setPokemon] = useState(null);
     const [pokemonName, setPokemonName] = useState('');
     const [guess, setGuess] = useState('');
@@ -92,6 +90,7 @@ const Game = () => {
             const fetchPokemonData = async () => {
                 const response = await fetch(pokemonUrl);
                 const data = await response.json();
+                console.log(data.name);
                 setPokemon(data);
                 setPokemonName(data.name);
                 setPokemonImage(data.sprites.other['official-artwork'].front_default);
@@ -101,7 +100,7 @@ const Game = () => {
 
             fetchPokemonData();
         }
-    }, [pokemonList, gameRunning, level]);
+    }, [pokemonList, gameRunning]);
 
     const handleGuessChange = (e) => {
         setGuess(e.target.value);
@@ -112,10 +111,12 @@ const Game = () => {
 
         if (guess.toLowerCase() === pokemonName.toLowerCase()) {
             setScore((prevScore) => prevScore + 10);
-            setCorrectGuesses((prevCorrectGuesses) => prevCorrectGuesses + 1);
             setShadowVisible(false);
+
+            // 새로운 문제를 로드하도록 setTimeout 추가
             setTimeout(() => {
-                levelUp();
+                levelUp();  // 레벨업
+                loadNextPokemon();  // 다음 문제를 로드
             }, 1000);
         } else {
             if (backgroundMusic.current) {
@@ -130,8 +131,26 @@ const Game = () => {
         setGuess('');
     };
 
+    const loadNextPokemon = () => {
+        const randomIndex = Math.floor(Math.random() * pokemonList.length);
+        const pokemonUrl = pokemonList[randomIndex].url;
+
+        const fetchPokemonData = async () => {
+            const response = await fetch(pokemonUrl);
+            const data = await response.json();
+            console.log(data.name);
+            setPokemon(data);
+            setPokemonName(data.name);
+            setPokemonImage(data.sprites.other['official-artwork'].front_default);
+            setShadowImage(data.sprites.other['official-artwork'].front_default);
+            setShadowVisible(true);
+        };
+
+        fetchPokemonData();
+    };
+
     const levelUp = () => {
-        setLevel((prevLevel) => prevLevel + 1);
+        setGameRunning(true);
     };
 
     const startGame = () => {
@@ -143,7 +162,6 @@ const Game = () => {
         }
 
         setScore(0);
-        setCorrectGuesses(0);
         setGameOver(false);
         setGameRunning(true);
         setFinalScore(0);
@@ -166,7 +184,14 @@ const Game = () => {
         const dateString = now.toLocaleString();
         setSavedDate(dateString);
 
-        const userId = localStorage.getItem('userId_user') || 'anonymous';
+        const userId = localStorage.getItem('userId_user'); // userId 가져오기
+        console.log('🔍 userId:', userId);
+        if (!userId || userId === 'null') {
+            console.error('🚫 No userId found in localStorage.');
+            setSaveMessage('Login required to save score.');
+            return;
+        }
+
         console.log('✅ 시작: userId =', userId);
 
         try {
