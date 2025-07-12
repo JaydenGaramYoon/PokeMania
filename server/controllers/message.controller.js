@@ -2,24 +2,24 @@ import Message from '../models/message.model.js';
 import User from '../models/user.model.js';
 
 export const createMessage = async (req, res) => {
-  const { section, message } = req.body;
+  const { section, message, sender } = req.body;
   
-  if (!section || !message) {
+  if (!section || !message || !sender) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
   try {
-    let sender = 'Guest';
-    if (req.auth && req.auth.name) {
-      sender = req.auth.name;
-    }
+    // let sender = 'Guest';
+    // if (req.auth && req.auth.name) {
+    //   sender = req.auth.name;
+    // }
 
     console.log('Creating message with sender:', sender, 'Auth info:', req.auth);
 
     const newMessage = new Message({
       section,
-      sender,
-      message
+      message,
+      sender
     });
 
     const savedMessage = await newMessage.save();

@@ -33,8 +33,8 @@ const TalkTalk = () => {
         // });
         // if (res.ok) {
         //   const user = await res.json();
-          setUsername(userName || 'Guest');
-        }
+        setUsername(userName || 'Guest');
+      }
       catch (err) {
         console.error('Failed to fetch user info:', err);
       }
@@ -64,12 +64,15 @@ const TalkTalk = () => {
 
   const handleSend = async () => {
     if (!input.trim()) return;
-    
+    const user = localStorage.getItem('user');
+    const userName = user ? JSON.parse(user).name : 'Guest';
+    console.log(userName);
     const newMessage = {
       section: activeCategory,
-      message: input
+      message: input,
+      sender: userName   // ← 추가!
     };
-    
+
     try {
       const res = await fetch('/api/messages', {
         method: 'POST',
@@ -77,7 +80,7 @@ const TalkTalk = () => {
         credentials: 'include',
         body: JSON.stringify(newMessage)
       });
-      
+
       if (res.ok) {
         const saved = await res.json();
         setMessages(prev => ({
