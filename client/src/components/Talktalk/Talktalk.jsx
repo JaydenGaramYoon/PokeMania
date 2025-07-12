@@ -25,14 +25,17 @@ const TalkTalk = () => {
   useEffect(() => {
     const fetchUsername = async () => {
       try {
-        const res = await fetch('/api/users/me', {
-          credentials: 'include'
-        });
-        if (res.ok) {
-          const user = await res.json();
-          setUsername(user.name || 'Guest');
+        const user = localStorage.getItem('user');
+        const userName = user ? JSON.parse(user).name : 'Guest';
+        console.log('Current user:', userName);
+        // const res = await fetch('/api/users/me', {
+        //   credentials: 'include'
+        // });
+        // if (res.ok) {
+        //   const user = await res.json();
+          setUsername(userName || 'Guest');
         }
-      } catch (err) {
+      catch (err) {
         console.error('Failed to fetch user info:', err);
       }
     };

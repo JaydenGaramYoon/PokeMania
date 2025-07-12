@@ -6,6 +6,7 @@ import Favourites from './src/components/Favourites/Favourites';
 import Talktalk from './src/components/Talktalk/Talktalk';
 import Game from './src/components/Game/Game';
 import Login from './src/components/Login/Login';
+import Profile from './src/components/Profile/Profile';
 
 const MainRouter = () => {
     return (<div>
@@ -17,6 +18,7 @@ const MainRouter = () => {
                     <Route path="/talktalk" element={<Talktalk />} />
                     <Route path="/game" element={<Game />} />
                     <Route path="/login" element={<Login />} />
+                    <Route path="/profile" element={<Profile />} />
                 </Routes>
         </main>
     </div>

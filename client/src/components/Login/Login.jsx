@@ -17,12 +17,13 @@ const Login = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
-
+      
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Login failed');
-
+      
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user)); // optional
+      console.log('Login successful:', data.user);
       navigate('/');
     } catch (err) {
       setError(err.message);
