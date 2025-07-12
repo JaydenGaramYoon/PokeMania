@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './TalkTalk.css';
 
 const categories = ['General', 'Guides', 'FanArt', 'Events'];
@@ -7,30 +7,90 @@ const TalkTalk = () => {
   const [activeCategory, setActiveCategory] = useState('General');
   const [messages, setMessages] = useState({});
   const [input, setInput] = useState('');
+  const [username, setUsername] = useState('Guest');
+  const chatEndRef = useRef(null);
+
+  const scrollToBottom = () => {
+    if (chatEndRef.current) {
+      chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const formatTimestamp = (timestamp) => {
+    const date = new Date(timestamp);
+    if (isNaN(date)) return '';
+    return date.toLocaleString();
+  };
 
   useEffect(() => {
-    const stored = localStorage.getItem('pokeMessages');
-    if (stored) {
-      setMessages(JSON.parse(stored));
-    }
+    const fetchUsername = async () => {
+      try {
+        const res = await fetch('/api/users/me', {
+          credentials: 'include'
+        });
+        if (res.ok) {
+          const user = await res.json();
+          setUsername(user.name || 'Guest');
+        }
+      } catch (err) {
+        console.error('Failed to fetch user info:', err);
+      }
+    };
+    fetchUsername();
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('pokeMessages', JSON.stringify(messages));
+    const fetchMessages = async () => {
+      try {
+        const res = await fetch(`/api/messages?section=${activeCategory}`);
+        const data = await res.json();
+        setMessages(prev => ({
+          ...prev,
+          [activeCategory]: data
+        }));
+      } catch (err) {
+        console.error('Failed to fetch messages:', err);
+      }
+    };
+    fetchMessages();
+  }, [activeCategory]);
+
+  useEffect(() => {
+    scrollToBottom();
   }, [messages]);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!input.trim()) return;
+    
     const newMessage = {
-      username: 'User',
-      text: input,
-      timestamp: new Date().toLocaleTimeString(),
+      section: activeCategory,
+      message: input
     };
-    setMessages(prev => ({
-      ...prev,
-      [activeCategory]: [...(prev[activeCategory] || []), newMessage],
-    }));
-    setInput('');
+    
+    try {
+      const res = await fetch('/api/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(newMessage)
+      });
+      
+      if (res.ok) {
+        const saved = await res.json();
+        setMessages(prev => ({
+          ...prev,
+          [activeCategory]: [...(prev[activeCategory] || []), saved]
+        }));
+        setInput('');
+      } else {
+        const errorData = await res.json();
+        console.error('Failed to send message:', errorData);
+        alert('Fail to send information: ' + (errorData.error || 'unknown error'));
+      }
+    } catch (err) {
+      console.error('Error:', err);
+      alert('Failed to send message. Please try again later.');
+    }
   };
 
   return (
@@ -39,7 +99,7 @@ const TalkTalk = () => {
         <img src="/images/pokeball.png" alt="logo" className="chat-logo" />
         PokéChat Forums
       </h2>
-
+      <div className="chat-user">Logged in as: <strong>{username}</strong></div>
       <div className="category-tabs">
         {categories.map((cat, index) => (
           <button
@@ -52,19 +112,18 @@ const TalkTalk = () => {
           </button>
         ))}
       </div>
-
       <div className="chat-body">
         <div className="chat-window">
           <div className="chat-messages">
             {(messages[activeCategory] || []).map((msg, idx) => (
               <div key={idx} className="message-card">
-                <strong className="username">{msg.username}</strong>: {msg.text}
-                <div className="timestamp">{msg.timestamp}</div>
+                <strong className="username">{msg.sender}</strong>: {msg.message}
+                <div className="timestamp">{formatTimestamp(msg.timestamp)}</div>
               </div>
             ))}
+            <div ref={chatEndRef} />
           </div>
         </div>
-
         <div className="chat-input-area">
           <input
             type="text"

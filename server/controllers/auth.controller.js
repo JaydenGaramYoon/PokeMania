@@ -10,7 +10,11 @@ const signin = async (req, res) => {
         if (!user.authenticate(req.body.password)) {
             return res.status(401).send({ error: "Email and password don't match." })
         }
-        const token = jwt.sign({ _id: user._id }, config.jwtSecret)
+        const token = jwt.sign({ 
+            _id: user._id,
+            name: user.name,
+            email: user.email
+        }, config.jwtSecret)
         res.cookie('t', token, { expire: new Date() + 9999 })
         return res.json({
             token,
@@ -33,7 +37,16 @@ const signout = (req, res) => {
 const requireSignin = expressjwt({
     secret: config.jwtSecret,
     algorithms: ["HS256"],
-    userProperty: 'auth'
+    userProperty: 'auth',
+    getToken: function fromHeaderOrCookie(req) {
+        if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
+            return req.headers.authorization.split(' ')[1];
+        }
+        else if (req.cookies && req.cookies.t) {
+            return req.cookies.t;
+        }
+        return null;
+    }
 })
 const hasAuthorization = (req, res, next) => {
     const authorized = req.profile && req.auth
