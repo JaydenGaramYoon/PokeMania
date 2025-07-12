@@ -138,12 +138,6 @@
     padding-bottom: 30px;
 }
 
-/* Add this to display correct guesses in the game screen */
-#correctGuesses {
-    margin-top: 20px;
-    font-size: 18px;
-    font-weight: bold;
-}
 
 /* Start Button */
 #startButton {
