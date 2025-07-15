@@ -1,12 +1,11 @@
 import Game from '../models/game.model.js';
 import errorHandler from './error.controller.js';
 
-// 게임 기록 생성
 const create = async (req, res) => {
     try {
-        const { user, score } = req.body; // user로 변경!
+        const { user, score } = req.body; 
         const game = new Game({
-            user: user, // user로 저장
+            user: user, 
             score: score,
             playedAt: new Date()
         });
@@ -19,12 +18,11 @@ const create = async (req, res) => {
     }
 };
 
-// 특정 유저의 게임 기록 리스트
 const getScore = async (req, res) => {
     try {
         const { userId } = req.params;
         const games = await Game.find({ user: userId }).sort({ playedAt: -1 });
-        res.json(games); // ✅ 반드시 res.json() 해야 함
+        res.json(games); 
     } catch (err) {
         return res.status(400).json({
             error: errorHandler.getErrorMessage(err)
@@ -50,7 +48,6 @@ const updateScore = async (req, res) => {
     }
 };
 
-// 게임 기록 삭제 (gameId로)
 const removeScore = async (req, res) => {
     try {
         const { gameId } = req.params;
