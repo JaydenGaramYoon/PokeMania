@@ -11,6 +11,7 @@ const TalkTalk = () => {
   const [recentMessages, setRecentMessages] = useState([]); // record recently sent messages
   const [editingMessage, setEditingMessage] = useState(null); // track which message is being edited
   const [editInput, setEditInput] = useState(''); // input for editing message
+  const [messageCount, setMessageCount] = useState({}); // track message count for each category
   const chatEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -54,12 +55,61 @@ const TalkTalk = () => {
           ...prev,
           [activeCategory]: data
         }));
+        setMessageCount(prev => ({
+          ...prev,
+          [activeCategory]: data.length
+        }));
       } catch (err) {
         console.error('Failed to fetch messages:', err);
       }
     };
     fetchMessages();
   }, [activeCategory]);
+
+  // Real-time database update check - check for message changes every 2 seconds
+  useEffect(() => {
+    const checkForUpdates = async () => {
+      try {
+        const res = await fetch(`/api/messages?section=${activeCategory}`);
+        const data = await res.json();
+        const currentMessages = messages[activeCategory] || [];
+        const currentCount = messageCount[activeCategory] || 0;
+        
+        // Check if message count changed (new/deleted messages)
+        const countChanged = data.length !== currentCount;
+        
+        // Check if message content changed (edited messages)
+        let contentChanged = false;
+        if (data.length === currentMessages.length && data.length > 0) {
+          // Create maps for efficient comparison by message ID
+          const currentMessagesMap = new Map(currentMessages.map(msg => [msg._id, msg]));
+          
+          // Check if any message content has changed
+          contentChanged = data.some(newMsg => {
+            const oldMsg = currentMessagesMap.get(newMsg._id);
+            return oldMsg && newMsg.message !== oldMsg.message;
+          });
+        }
+        
+        // Update interface if count or content changed
+        if (countChanged || contentChanged) {
+          setMessages(prev => ({
+            ...prev,
+            [activeCategory]: data
+          }));
+          setMessageCount(prev => ({
+            ...prev,
+            [activeCategory]: data.length
+          }));
+        }
+      } catch (err) {
+        console.error('Failed to check for updates:', err);
+      }
+    };
+
+    const interval = setInterval(checkForUpdates, 2000); // Check every 2 seconds
+    return () => clearInterval(interval);
+  }, [activeCategory, messageCount]);
 
   useEffect(() => {
     scrollToBottom();
@@ -73,7 +123,7 @@ const TalkTalk = () => {
     const newMessage = {
       section: activeCategory,
       message: input,
-      sender: userName   // ← 추가!
+      sender: userName   // Added sender field
     };
 
     try {
@@ -91,7 +141,7 @@ const TalkTalk = () => {
           [activeCategory]: [...(prev[activeCategory] || []), saved]
         }));
         
-        // record the recent message, 1 minute later it will be removed
+        // Record the recent message, remove it after 1 minute
         setRecentMessages(prev => [...prev, saved._id]);
         setTimeout(() => {
           setRecentMessages(prev => prev.filter(id => id !== saved._id));
@@ -127,13 +177,13 @@ const TalkTalk = () => {
       });
 
       if (res.ok) {
-        // remove messages from the current category
+        // Remove message from the current category
         setMessages(prev => ({
           ...prev,
           [activeCategory]: prev[activeCategory].filter(msg => msg._id !== messageId)
         }));
         
-        // remove from recent messages
+        // Remove from recent messages
         setRecentMessages(prev => prev.filter(id => id !== messageId));
         
         alert('Message deleted successfully!');
@@ -170,7 +220,7 @@ const TalkTalk = () => {
 
       if (res.ok) {
         const updatedMessage = await res.json();
-        // update the message in current category
+        // Update the message in current category
         setMessages(prev => ({
           ...prev,
           [activeCategory]: prev[activeCategory].map(msg => 
@@ -178,7 +228,7 @@ const TalkTalk = () => {
           )
         }));
         
-        // exit edit mode
+        // Exit edit mode
         setEditingMessage(null);
         setEditInput('');
         
@@ -210,13 +260,13 @@ const TalkTalk = () => {
     const user = localStorage.getItem('user');
     const userName = user ? JSON.parse(user).name : 'Guest';
     
-    // only the sender can edit their own messages
+    // Only the sender can edit their own messages
     if (message.sender !== userName) return false;
     
-    // only messages in recentMessages can be edited
+    // Only messages in recentMessages can be edited
     if (!recentMessages.includes(message._id)) return false;
     
-    // check if within 1 minute
+    // Check if within 1 minute
     const messageTime = new Date(message.timestamp);
     const currentTime = new Date();
     const timeDifference = currentTime - messageTime;
@@ -230,13 +280,13 @@ const TalkTalk = () => {
     const user = localStorage.getItem('user');
     const userName = user ? JSON.parse(user).name : 'Guest';
     
-    // only the sender can delete their own messages
+    // Only the sender can delete their own messages
     if (message.sender !== userName) return false;
     
-    // only messages in recentMessages can be deleted
+    // Only messages in recentMessages can be deleted
     if (!recentMessages.includes(message._id)) return false;
     
-    // check if within 1 minute
+    // Check if within 1 minute
     const messageTime = new Date(message.timestamp);
     const currentTime = new Date();
     const timeDifference = currentTime - messageTime;
@@ -266,6 +316,11 @@ const TalkTalk = () => {
       </div>
       <div className="chat-body">
         <div className="chat-window">
+          {/* Real-time update indicator */}
+          <div className="live-indicator">
+            <div className="live-dot"></div>
+            LIVE
+          </div>
           <div className="chat-messages">
             {(messages[activeCategory] || []).map((msg, idx) => (
               <div key={idx} className="message-card">
