@@ -26,4 +26,9 @@ router.route('/messages')
   .get(messageCtrl.getMessagesBySection)
   .post(optionalAuth, messageCtrl.createMessage);
 
+
+router.route('/messages/:messageId')
+  .delete(messageCtrl.deleteMessage)
+  .put(messageCtrl.editMessage);
+
 export default router;
