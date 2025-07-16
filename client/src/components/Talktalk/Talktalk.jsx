@@ -8,6 +8,9 @@ const TalkTalk = () => {
   const [messages, setMessages] = useState({});
   const [input, setInput] = useState('');
   const [username, setUsername] = useState('Guest');
+  const [recentMessages, setRecentMessages] = useState([]); // record recently sent messages
+  const [editingMessage, setEditingMessage] = useState(null); // track which message is being edited
+  const [editInput, setEditInput] = useState(''); // input for editing message
   const chatEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -87,6 +90,13 @@ const TalkTalk = () => {
           ...prev,
           [activeCategory]: [...(prev[activeCategory] || []), saved]
         }));
+        
+        // record the recent message, 1 minute later it will be removed
+        setRecentMessages(prev => [...prev, saved._id]);
+        setTimeout(() => {
+          setRecentMessages(prev => prev.filter(id => id !== saved._id));
+        }, 1 * 60 * 1000); // 1 minute
+        
         setInput('');
       } else {
         const errorData = await res.json();
@@ -97,6 +107,142 @@ const TalkTalk = () => {
       console.error('Error:', err);
       alert('Failed to send message. Please try again later.');
     }
+  };
+
+  // remove message
+  const handleDeleteMessage = async (messageId) => {
+    if (!window.confirm('Are you sure you want to delete this message?')) {
+      return;
+    }
+
+    const user = localStorage.getItem('user');
+    const userName = user ? JSON.parse(user).name : 'Guest';
+
+    try {
+      const res = await fetch(`/api/messages/${messageId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ sender: userName })
+      });
+
+      if (res.ok) {
+        // remove messages from the current category
+        setMessages(prev => ({
+          ...prev,
+          [activeCategory]: prev[activeCategory].filter(msg => msg._id !== messageId)
+        }));
+        
+        // remove from recent messages
+        setRecentMessages(prev => prev.filter(id => id !== messageId));
+        
+        alert('Message deleted successfully!');
+      } else {
+        const errorData = await res.json();
+        alert('Failed to delete message: ' + (errorData.error || 'Unknown error'));
+      }
+    } catch (err) {
+      console.error('Error deleting message:', err);
+      alert('Failed to delete message. Please try again later.');
+    }
+  };
+
+  // edit message
+  const handleEditMessage = async (messageId) => {
+    if (!editInput.trim()) {
+      alert('Message cannot be empty');
+      return;
+    }
+
+    const user = localStorage.getItem('user');
+    const userName = user ? JSON.parse(user).name : 'Guest';
+
+    try {
+      const res = await fetch(`/api/messages/${messageId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ 
+          sender: userName,
+          message: editInput
+        })
+      });
+
+      if (res.ok) {
+        const updatedMessage = await res.json();
+        // update the message in current category
+        setMessages(prev => ({
+          ...prev,
+          [activeCategory]: prev[activeCategory].map(msg => 
+            msg._id === messageId ? updatedMessage : msg
+          )
+        }));
+        
+        // exit edit mode
+        setEditingMessage(null);
+        setEditInput('');
+        
+        alert('Message edited successfully!');
+      } else {
+        const errorData = await res.json();
+        alert('Failed to edit message: ' + (errorData.error || 'Unknown error'));
+      }
+    } catch (err) {
+      console.error('Error editing message:', err);
+      alert('Failed to edit message. Please try again later.');
+    }
+  };
+
+  // start editing a message
+  const startEditMessage = (message) => {
+    setEditingMessage(message._id);
+    setEditInput(message.message);
+  };
+
+  // cancel editing
+  const cancelEdit = () => {
+    setEditingMessage(null);
+    setEditInput('');
+  };
+
+  // check if the message can be edited (same time limit as delete - 1 minute)
+  const canEditMessage = (message) => {
+    const user = localStorage.getItem('user');
+    const userName = user ? JSON.parse(user).name : 'Guest';
+    
+    // only the sender can edit their own messages
+    if (message.sender !== userName) return false;
+    
+    // only messages in recentMessages can be edited
+    if (!recentMessages.includes(message._id)) return false;
+    
+    // check if within 1 minute
+    const messageTime = new Date(message.timestamp);
+    const currentTime = new Date();
+    const timeDifference = currentTime - messageTime;
+    const oneMinute = 1 * 60 * 1000;
+    
+    return timeDifference <= oneMinute;
+  };
+
+  // check if the message can be deleted
+  const canDeleteMessage = (message) => {
+    const user = localStorage.getItem('user');
+    const userName = user ? JSON.parse(user).name : 'Guest';
+    
+    // only the sender can delete their own messages
+    if (message.sender !== userName) return false;
+    
+    // only messages in recentMessages can be deleted
+    if (!recentMessages.includes(message._id)) return false;
+    
+    // check if within 1 minute
+    const messageTime = new Date(message.timestamp);
+    const currentTime = new Date();
+    const timeDifference = currentTime - messageTime;
+    const oneMinute = 1 * 60 * 1000;
+    
+    return timeDifference <= oneMinute;
   };
 
   return (
@@ -123,8 +269,64 @@ const TalkTalk = () => {
           <div className="chat-messages">
             {(messages[activeCategory] || []).map((msg, idx) => (
               <div key={idx} className="message-card">
-                <strong className="username">{msg.sender}</strong>: {msg.message}
-                <div className="timestamp">{formatTimestamp(msg.timestamp)}</div>
+                {editingMessage === msg._id ? (
+                  // Edit mode
+                  <>
+                    <strong className="username">{msg.sender}</strong>: 
+                    <input
+                      type="text"
+                      value={editInput}
+                      onChange={e => setEditInput(e.target.value)}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter') handleEditMessage(msg._id);
+                        if (e.key === 'Escape') cancelEdit();
+                      }}
+                      className="inline-edit-input"
+                      autoFocus
+                    />
+                    <div className="timestamp">{formatTimestamp(msg.timestamp)}</div>
+                    <button 
+                      onClick={() => handleEditMessage(msg._id)}
+                      className="save-edit-button"
+                      title="Save changes (Enter)"
+                    >
+                      ✓
+                    </button>
+                    <button 
+                      onClick={cancelEdit}
+                      className="cancel-edit-button"
+                      title="Cancel editing (Esc)"
+                    >
+                      ✕
+                    </button>
+                  </>
+                ) : (
+                  // Display mode
+                  <>
+                    <strong className="username">{msg.sender}</strong>: {msg.message}
+                    <div className="timestamp">{formatTimestamp(msg.timestamp)}</div>
+                    {/* Edit button - positioned left of delete button */}
+                    {canEditMessage(msg) && (
+                      <button 
+                        className="edit-button" 
+                        onClick={() => startEditMessage(msg)}
+                        title="Edit message (within 1 minute)"
+                      >
+                        ✏️
+                      </button>
+                    )}
+                    {/* Delete button - maintains original position */}
+                    {canDeleteMessage(msg) && (
+                      <button 
+                        className="delete-button" 
+                        onClick={() => handleDeleteMessage(msg._id)}
+                        title="Delete message (within 1 minute)"
+                      >
+                        &#10006;
+                      </button>
+                    )}
+                  </>
+                )}
               </div>
             ))}
             <div ref={chatEndRef} />
