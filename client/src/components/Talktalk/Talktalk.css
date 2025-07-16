@@ -111,14 +111,140 @@ html, body {
 }
 
 .message-card {
+  position: relative;
   background: #fef9e7;
   border-left: 5px solid #ffcb05;
   border-radius: 10px;
-  padding: 10px 14px;
+  padding: 12px 16px;
   margin-bottom: 10px;
   font-size: 14px;
   line-height: 1.6;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.message-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.delete-button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #ff4444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  width: 32px;
+  height: 20px;
+  font-size: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.7;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.delete-button:hover {
+  opacity: 1;
+  background: #cc0000;
+  transform: scale(1.05);
+}
+
+.delete-button:active {
+  transform: scale(0.95);
+}
+
+
+.edit-button {
+  position: absolute;
+  top: 8px;
+  right: 54px;
+  background: #ffc107;
+  color: #333;
+  border: none;
+  border-radius: 6px;
+  width: 32px;
+  height: 20px;
+  font-size: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.7;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.edit-button:hover {
+  opacity: 1;
+  background: #e0a800;
+  transform: scale(1.05);
+}
+
+.edit-button:active {
+  transform: scale(0.95);
+}
+
+
+.inline-edit-input {
+  background: white;
+  border: 2px solid #3b4cca;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 14px;
+  margin: 0 4px;
+  flex: 1;
+  min-width: 200px;
+}
+
+.inline-edit-input:focus {
+  outline: none;
+  border-color: #ffcb05;
+  box-shadow: 0 0 0 2px rgba(255, 203, 5, 0.3);
+}
+
+
+.save-edit-button,
+.cancel-edit-button {
+  position: absolute;
+  top: 8px;
+  border: none;
+  border-radius: 6px;
+  width: 32px;
+  height: 20px;
+  font-size: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.save-edit-button {
+  right: 54px;
+  background: #28a745;
+  color: white;
+}
+
+.save-edit-button:hover {
+  background: #218838;
+  transform: scale(1.05);
+}
+
+.cancel-edit-button {
+  right: 8px;
+  background: #dc3545;
+  color: white;
+}
+
+.cancel-edit-button:hover {
+  background: #c82333;
+  transform: scale(1.05);
 }
 
 .username {

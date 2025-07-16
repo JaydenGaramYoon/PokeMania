@@ -6,6 +6,10 @@ router.route('/api/users')
     .get(userCtrl.list)
     .post(userCtrl.create)
 
+router.get('/api/users/me', authCtrl.requireSignin, (req, res) => {
+  res.json(req.auth);
+});
+
 router.route('/api/users/:userId')
     .get(authCtrl.requireSignin, userCtrl.read)
     .put(authCtrl.requireSignin, authCtrl.hasAuthorization,
