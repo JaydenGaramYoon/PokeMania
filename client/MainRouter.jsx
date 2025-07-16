@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import Home from './src/components/Home/Home';
 import Layout from './src/components/Layout/Layout';
@@ -14,22 +14,31 @@ const MainRouter = () => {
   const isLoggedIn = !!token;
   const isLoginPage = location.pathname === '/';
 
-  // 🧠 Only show Login page if not logged in
-  if (!isLoggedIn && isLoginPage) {
+  // ✅ Clear token on page close/refresh
+  useEffect(() => {
+    const handleUnload = () => {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+    };
+    window.addEventListener('beforeunload', handleUnload);
+    return () => window.removeEventListener('beforeunload', handleUnload);
+  }, []);
+
+  // 🔐 Not logged in → always go to login
+  if (!isLoggedIn) {
     return (
       <Routes>
-        <Route path="/" element={<Login />} />
+        <Route path="*" element={<Login />} />
       </Routes>
     );
   }
 
-  // 🔓 After login, show full app
+  // ✅ Logged in → show app
   return (
     <div>
       <Layout />
       <main>
         <Routes>
-          <Route path="/" element={<Login />} />
           <Route path="/home" element={<Home />} />
           <Route path="/favourites" element={<Favourites />} />
           <Route path="/talktalk" element={<Talktalk />} />
