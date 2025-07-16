@@ -9,17 +9,19 @@ export default function Layout() {
     const handleLogout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-        navigate('/login');
+        navigate('/');
     };
+
 
     return (
         <div className="layout">
             <nav className="navbar">
                 <div className="nav-content">
                     <div className="logo">
-                        <Link to="/" className="nav-link">
+                        <Link to="/home" className="nav-link">
                             <img src="/images/appLogo.PNG" alt="appLogo" />
                         </Link>
+
                     </div>
 
                     <div className="nav-links">
