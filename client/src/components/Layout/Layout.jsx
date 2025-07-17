@@ -31,7 +31,7 @@ export default function Layout() {
 
                         {/* 👤 Show user name if logged in */}
                         {isLoggedIn && user && (
-                            <span className="nav-link">👋 {user.name}</span>
+                           <Link to="/profile" className="nav-link">👋 {user.name}</Link>
                         )}
 
                         {isLoggedIn ? (
