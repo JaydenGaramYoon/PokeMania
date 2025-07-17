@@ -8,6 +8,7 @@ import helmet from 'helmet';
 import userRoutes from './routes/user.routes.js';
 import authRoutes from './routes/auth.routes.js';
 import gameRoutes from './routes/game.routes.js';
+import favouritesRoutes from './routes/favourites.routes.js';
 
 const app = express();
 
@@ -29,6 +30,7 @@ app.use(helmet());
 app.use('/', userRoutes);
 app.use('/', authRoutes);
 app.use('/', gameRoutes);
+app.use('/', favouritesRoutes);
 
 // ✅ Error handler
 app.use((err, req, res, next) => {
