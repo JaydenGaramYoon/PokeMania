@@ -3,29 +3,64 @@ import './Favourites.css'; // Import the CSS file
 
 const Favourites = () => {
     const [favourites, setFavourites] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // pokemon_으로 시작하는 키만 파싱
-        const storedFavourites = Object.keys(localStorage)
-            .filter(key => key.startsWith('pokemon_')) // pokemon_으로 시작하는 키만
-            .map(key => {
-                try {
-                    return JSON.parse(localStorage.getItem(key));
-                } catch {
-                    return null;
-                }
+        const user = JSON.parse(localStorage.getItem('user'));
+        const userId = user ? user._id : null;
+        console.log('Current user ID:', userId);
+        if (!userId) {
+            setFavourites([]);
+            setLoading(false);
+            return;
+        }
+
+        // CRUD Operation2 : Read user's favourites from the server
+        fetch(`/api/favourites/users/${userId}`)
+            .then(res => res.json())
+            .then(async data => {
+                // 각 포켓몬 id로 PokéAPI에서 상세 정보 받아오기
+                const pokemonDetails = await Promise.all(
+                    data.map(async fav => {
+                        const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${fav.pokemonId}`);
+                        const poke = await res.json();
+                        return {
+                            id: poke.id,
+                            name: poke.name,
+                            image: poke.sprites.other['official-artwork'].front_default,
+                            types: poke.types.map(t => t.type.name)
+                        };
+                    })
+                );
+                setFavourites(pokemonDetails);
+                setLoading(false);
             })
-            .filter(Boolean);
-        setFavourites(storedFavourites);
+            .catch(() => {
+                setFavourites([]);
+                setLoading(false);
+            });
     }, []);
 
-    const handleRemoveFavourite = (pokemonId) => {
-        // Remove from localStorage (prefix 포함)
-        localStorage.removeItem(`pokemon_${pokemonId}`);
-        // Update state to re-render the component
-        setFavourites(prevFavourites => prevFavourites.filter(p => p.id !== pokemonId));
-        alert('Removed from Poké Box!');
+    const handleRemoveFavourite = async (pokemonId) => {
+        const user = JSON.parse(localStorage.getItem('user'));
+        const userId = user ? user._id : null;
+        if (!userId) {
+            alert('Login required!');
+            return;
+        }
+
+        try {
+            const res = await fetch(`/api/favourites/${userId}/${pokemonId}`, {
+                method: 'DELETE',
+            });
+            if (!res.ok) throw new Error('Failed to remove favourite');
+            setFavourites(prevFavourites => prevFavourites.filter(p => p.id !== pokemonId));
+            alert('Removed from Poké Box!');
+        } catch (err) {
+            alert('Error: ' + err.message);
+        }
     };
+
 
     return (
         <div className="favourites-page">

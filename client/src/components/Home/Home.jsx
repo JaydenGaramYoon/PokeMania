@@ -272,15 +272,54 @@ const Home = () => {
         }
     };
 
-    const handleAddToFavourites = (pokemon) => {
-        const key = `pokemon_${pokemon.id}`; // pokemon_ prefix 사용
-        if (localStorage.getItem(key)) {
-            alert("Already in favourites!");
+    //Crud Operation 1: Create Pokémon to favourites
+    const handleAddToFavourites = async (pokemon) => {
+        const user = JSON.parse(localStorage.getItem('user'));
+        const userId = user ? user._id : null;
+        console.log("User ID:", userId, pokemon.id);
+
+        if (!userId) {
+            alert("Login required!");
             return;
         }
-        localStorage.setItem(key, JSON.stringify(pokemon));
-        setFavourites(prevFavourites => [...prevFavourites, pokemon]);
-        alert(`${pokemon.name} added to favourites!`);
+
+        try {
+            console.log("[디버그] fetch POST /api/favourites 요청 시작");
+
+            const response = await fetch(`/api/favourites`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    user: userId,
+                    pokemonId: pokemon.id,
+                }),
+            });
+            console.log("fetch response:", response);
+            if (response.status === 409) {
+                alert("This Pokémon is already in your Poké Box!");
+                return;
+            }
+
+            if (!response.ok) if (!response.ok) {
+                let err;
+                try {
+                    err = await response.json();
+                } catch {
+                    err = { error: "Failed to add favourites" };
+                }
+                console.error("[디버그] 서버 에러 응답:", err);
+
+                throw new Error(err.error || "Failed to add favourites");
+            }
+
+            setFavourites(prev => [...prev, pokemon]);
+            alert(`${pokemon.name} added to your Poké Box!`);
+        } catch (error) {
+            console.error("Add Favourite Error:", error);
+            alert(`Error: ${error.message}`);
+        }
     };
 
     const handleModalOpen = (pokemon) => {
@@ -291,6 +330,9 @@ const Home = () => {
     const handleModalClose = () => {
         setShowModal(false);
     };
+
+
+
 
     return (
         <>
