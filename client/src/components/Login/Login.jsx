@@ -31,6 +31,7 @@ const Login = () => {
 
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
+      console.log('Token:', data.token);
       console.log('Login successful:', data.user);
       navigate('/home');
     } catch (err) {
@@ -77,6 +78,8 @@ const Login = () => {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
+        
+        <button type="submit">Log In</button>
 
         <button
           type="button"
@@ -86,7 +89,6 @@ const Login = () => {
           Sign Up
         </button>
 
-        <button type="submit">Log In</button>
       </form>
 
       {/* ✅ Sign-Up Modal */}

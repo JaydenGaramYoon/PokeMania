@@ -1,6 +1,8 @@
 import User from '../models/user.model.js'
 import extend from 'lodash/extend.js'
 import errorHandler from './error.controller.js'
+import crypto from 'crypto'
+
 const create = async (req, res) => {
     const user = new User(req.body)
     try {
@@ -72,4 +74,27 @@ const remove = async (req, res) => {
         })
     }
 }
-export default { create, userByID, read, list, remove, update }
+
+export const changePassword = async (req, res) => {
+  const { userId } = req.params;
+  const { new_password } = req.body;
+  if (!new_password || new_password.length < 6) {
+    return res.status(400).json({ error: 'Password too short' });
+  }
+  try {
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    // virtual password 활용!
+    user.password = new_password; // 이 한 줄로 salt와 hashed_password가 자동 생성됨
+    user.updated = Date.now();
+
+    await user.save();
+
+    res.json({ message: 'Password updated' });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+export default { create, userByID, read, list, remove, update, changePassword }
