@@ -3,16 +3,31 @@ import MainRouter from '../../../MainRouter';
 const App = () => {
   return (
     <Router>
-      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ flex: 1 }}>
+      <div style={{ 
+        minHeight: '100vh', 
+        width: '100%',
+        position: 'relative'
+      }}>
+        <div style={{ 
+          minHeight: '100vh',
+          paddingBottom: '80px' // 为悬浮footer留出空间
+        }}>
           <MainRouter />
         </div>
         <footer style={{
-          marginTop: "10%",
-          padding: "4px",
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          padding: "12px 4px",
           textAlign: "center",
-          color: "#888",
-          fontSize: "12px",
+          color: "#666",
+          fontSize: "11px",
+          backgroundColor: "rgba(248, 249, 250, 0.95)",
+          backdropFilter: "blur(5px)",
+          borderTop: "1px solid rgba(233, 236, 239, 0.8)",
+          zIndex: 1000,
+          boxShadow: "0 -2px 10px rgba(0,0,0,0.1)"
         }}>
           © 2025 Centennial College | Bright Bridge | COMP 229 | Fall 2025 | All rights reserved.
         </footer>

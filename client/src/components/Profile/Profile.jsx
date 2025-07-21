@@ -205,6 +205,8 @@ const Profile = () => {
 
   // 📦 Initialize form data as null and wait for fetch
   const [formData, setFormData] = useState(null);
+  // 🎯 Separate edit form data for temporary changes
+  const [editFormData, setEditFormData] = useState(null);
   const [pokemonTypes, setPokemonTypes] = useState([]);
 
   // 🧑‍💻 User info state
@@ -256,26 +258,26 @@ const Profile = () => {
     fetchProfile();
   }, [userId]);
 
-  // 📝 Handle input changes (single or array fields)
+  // 📝 Handle input changes (single or array fields) - Now uses editFormData
   const handleInputChange = (e, field, index) => {
-    if (!formData) return;
+    if (!editFormData) return;
     if (field === 'details') {
-      const newDetails = [...formData.details];
+      const newDetails = [...editFormData.details];
       newDetails[index] = e.target.value;
-      setFormData({ ...formData, details: newDetails });
+      setEditFormData({ ...editFormData, details: newDetails });
     } else if (field === 'types') {
-      setFormData({ ...formData, types: e.target.value.split(',').map(t => t.trim()) });
+      setEditFormData({ ...editFormData, types: e.target.value.split(',').map(t => t.trim()) });
     } else {
-      setFormData({ ...formData, [field]: e.target.value });
+      setEditFormData({ ...editFormData, [field]: e.target.value });
     }
   };
 
-  // 💾 Save profile to backend (PUT)
+  // 💾 Save profile to backend (PUT) - Now commits editFormData to formData
   const handleSave = async () => {
     try {
       // 프로필이 처음 저장되는 경우(즉, formData가 기본값이거나 새로 생성된 경우) POST 요청
-      const method = formData && formData._id ? 'PUT' : 'POST';
-      const url = formData && formData._id
+      const method = editFormData && editFormData._id ? 'PUT' : 'POST';
+      const url = editFormData && editFormData._id
         ? `/api/profile/users/${userId}`
         : `/api/profile`;
 
@@ -285,14 +287,15 @@ const Profile = () => {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
           },
-        body: JSON.stringify({ ...formData, userId })
+        body: JSON.stringify({ ...editFormData, userId })
       });
       console.log('Save profile response:', res); // Debugging: Check response
 
       if (res.ok) {
         const updated = await res.json();
         console.log('Profile saved:', updated);
-        setFormData(updated);
+        setFormData(updated); // Update main data with saved result
+        setEditFormData(null); // Clear temporary edit data
         setIsModalOpen(false);
       } else {
         console.error('Failed to save profile:', res.statusText);
@@ -397,8 +400,17 @@ const Profile = () => {
 
 
 
-  // ❌ Cancel edit
-  const handleCancel = () => setIsModalOpen(false);
+  // ❌ Cancel edit - restore original data
+  const handleCancel = () => {
+    setEditFormData(null); // Clear temporary edit data
+    setIsModalOpen(false);
+  };
+
+  // 🎯 Open edit modal - copy current data to edit state
+  const openEditModal = () => {
+    setEditFormData(formData ? { ...formData } : null); // Copy current data for editing
+    setIsModalOpen(true);
+  };
 
   // ⛔ Prevent rendering if profile not loaded
   if (!formData) return <div>Loading profile...</div>;
@@ -421,7 +433,7 @@ const Profile = () => {
             </div>
           </div>
           <button className={styles.myAccountButton} onClick={() => setIsAccountModalOpen(true)}>My Account</button>
-          <button className={styles.editButton} onClick={() => setIsModalOpen(true)}>✏️ Edit Profile</button>
+          <button className={styles.editButton} onClick={openEditModal}>✏️ Edit Profile</button>
         </div>
       </div>
 
@@ -486,53 +498,53 @@ const Profile = () => {
 
 
       {/* 🛠️ Edit Modal for Profile Editing */}
-      {isModalOpen && (
+      {isModalOpen && editFormData && (
         <div className={styles.modalOverlay}>
           <div className={styles.modal}>
             <h2>Edit Profile</h2>
             <div className={styles.modalContent}>
               {/* 기존 프로필 수정 폼 */}
               <label>Profile Image URL:
-                <input type="text" value={formData.iconUrl} onChange={(e) => handleInputChange(e, 'iconUrl')} />
+                <input type="text" value={editFormData.iconUrl} onChange={(e) => handleInputChange(e, 'iconUrl')} />
               </label>
               <label>Banner Image URL:
-                <input type="text" value={formData.bannerUrl} onChange={(e) => handleInputChange(e, 'bannerUrl')} />
+                <input type="text" value={editFormData.bannerUrl} onChange={(e) => handleInputChange(e, 'bannerUrl')} />
               </label>
               <label>Name:
-                <input type="text" value={formData.name} onChange={(e) => handleInputChange(e, 'name')} />
+                <input type="text" value={editFormData.name} onChange={(e) => handleInputChange(e, 'name')} />
               </label>
               <label>Title:
-                <input type="text" value={formData.title} onChange={(e) => handleInputChange(e, 'title')} />
+                <input type="text" value={editFormData.title} onChange={(e) => handleInputChange(e, 'title')} />
               </label>
               <label>Location:
-                <input type="text" value={formData.location} onChange={(e) => handleInputChange(e, 'location')} />
+                <input type="text" value={editFormData.location} onChange={(e) => handleInputChange(e, 'location')} />
               </label>
               <label>Summary:
-                <textarea value={formData.summary} onChange={(e) => handleInputChange(e, 'summary')} />
+                <textarea value={editFormData.summary} onChange={(e) => handleInputChange(e, 'summary')} />
               </label>
               <label>Favorite Types (comma separated):
-                <input type="text" value={formData.types.join(', ')} onChange={(e) => handleInputChange(e, 'types')} />
+                <input type="text" value={editFormData.types.join(', ')} onChange={(e) => handleInputChange(e, 'types')} />
               </label>
               <label>Starter Pokémon:
-                <input type="text" value={formData.details[0]} onChange={(e) => handleInputChange(e, 'details', 0)} />
+                <input type="text" value={editFormData.details[0]} onChange={(e) => handleInputChange(e, 'details', 0)} />
               </label>
               <label>Favorite Pokémon:
-                <input type="text" value={formData.details[1]} onChange={(e) => handleInputChange(e, 'details', 1)} />
+                <input type="text" value={editFormData.details[1]} onChange={(e) => handleInputChange(e, 'details', 1)} />
               </label>
               <label>Badges Earned:
-                <input type="text" value={formData.details[2]} onChange={(e) => handleInputChange(e, 'details', 2)} />
+                <input type="text" value={editFormData.details[2]} onChange={(e) => handleInputChange(e, 'details', 2)} />
               </label>
               <label>Regions Visited:
-                <input type="text" value={formData.details[3]} onChange={(e) => handleInputChange(e, 'details', 3)} />
+                <input type="text" value={editFormData.details[3]} onChange={(e) => handleInputChange(e, 'details', 3)} />
               </label>
               <label>Trainer Since:
-                <input type="text" value={formData.details[4]} onChange={(e) => handleInputChange(e, 'details', 4)} />
+                <input type="text" value={editFormData.details[4]} onChange={(e) => handleInputChange(e, 'details', 4)} />
               </label>
               <label>Languages:
-                <input type="text" value={formData.details[5]} onChange={(e) => handleInputChange(e, 'details', 5)} />
+                <input type="text" value={editFormData.details[5]} onChange={(e) => handleInputChange(e, 'details', 5)} />
               </label>
               <label>Guild:
-                <input type="text" value={formData.details[6]} onChange={(e) => handleInputChange(e, 'details', 6)} />
+                <input type="text" value={editFormData.details[6]} onChange={(e) => handleInputChange(e, 'details', 6)} />
               </label>
             </div>
             <div className={styles.modalActions}>
