@@ -4,6 +4,8 @@ import './Favourites.css'; // Import the CSS file
 const Favourites = () => {
     const [favourites, setFavourites] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [editingPokemon, setEditingPokemon] = useState(null);
+    const [editForm, setEditForm] = useState({ memo: '' });
 
     useEffect(() => {
         const user = JSON.parse(localStorage.getItem('user'));
@@ -28,7 +30,8 @@ const Favourites = () => {
                             id: poke.id,
                             name: poke.name,
                             image: poke.sprites.other['official-artwork'].front_default,
-                            types: poke.types.map(t => t.type.name)
+                            types: poke.types.map(t => t.type.name),
+                            memo: fav.memo || ''
                         };
                     })
                 );
@@ -41,6 +44,7 @@ const Favourites = () => {
             });
     }, []);
 
+    //CRUD Operation3 : Remove a favourite
     const handleRemoveFavourite = async (pokemonId) => {
         const user = JSON.parse(localStorage.getItem('user'));
         const userId = user ? user._id : null;
@@ -61,6 +65,54 @@ const Favourites = () => {
         }
     };
 
+    // CRUD Operation4 : Update favourite (memo)
+    const handleEditStart = (pokemon) => {
+        setEditingPokemon(pokemon.id);
+        setEditForm({
+            memo: pokemon.memo
+        });
+    };
+
+    const handleEditCancel = () => {
+        setEditingPokemon(null);
+        setEditForm({ memo: '' });
+    };
+
+    const handleEditSave = async (pokemonId) => {
+        const user = JSON.parse(localStorage.getItem('user'));
+        const userId = user ? user._id : null;
+        if (!userId) {
+            alert('Login required!');
+            return;
+        }
+
+        try {
+            const res = await fetch(`/api/favourites/${userId}/${pokemonId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(editForm)
+            });
+            if (!res.ok) throw new Error('Failed to update favourite');
+            
+            // 로컬 state 업데이트
+            setFavourites(prevFavourites => 
+                prevFavourites.map(p => 
+                    p.id === pokemonId 
+                        ? { ...p, memo: editForm.memo }
+                        : p
+                )
+            );
+            
+            setEditingPokemon(null);
+            setEditForm({ memo: '' });
+            alert('Updated successfully!');
+        } catch (err) {
+            alert('Error: ' + err.message);
+        }
+    };
+
 
     return (
         <div className="favourites-page">
@@ -73,12 +125,51 @@ const Favourites = () => {
                             <img src={pokemon.image} alt={pokemon.name} />
                             <p>ID: {pokemon.id}</p>
                             <p>Types: {pokemon.types.join(', ')}</p>
-                            <button
-                                className="remove-button"
-                                onClick={() => handleRemoveFavourite(pokemon.id)}
-                            >
-                                Remove
-                            </button>
+                            
+                            {editingPokemon === pokemon.id ? (
+                                <div className="edit-form">
+                                    <textarea
+                                        placeholder="Memo"
+                                        value={editForm.memo}
+                                        onChange={(e) => setEditForm({...editForm, memo: e.target.value})}
+                                        rows="3"
+                                    />
+                                    <div className="edit-buttons">
+                                        <button 
+                                            className="save-button"
+                                            onClick={() => handleEditSave(pokemon.id)}
+                                        >
+                                            Save
+                                        </button>
+                                        <button 
+                                            className="cancel-button"
+                                            onClick={handleEditCancel}
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="pokemon-info">
+                                    {pokemon.memo && (
+                                        <p className="memo">Memo: {pokemon.memo}</p>
+                                    )}
+                                    <div className="action-buttons">
+                                        <button
+                                            className="edit-button"
+                                            onClick={() => handleEditStart(pokemon)}
+                                        >
+                                            Edit
+                                        </button>
+                                        <button
+                                            className="remove-button"
+                                            onClick={() => handleRemoveFavourite(pokemon.id)}
+                                        >
+                                            Remove
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     ))}
                 </div>

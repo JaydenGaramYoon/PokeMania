@@ -9,6 +9,10 @@ const FavouriteSchema = new mongoose.Schema({
     pokemonId: {
         type: Number,
         required: true
+    },
+    memo: {
+        type: String,
+        default: ''
     }
 });
 

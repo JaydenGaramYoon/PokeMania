@@ -15,4 +15,6 @@ router.get('/api/favourites/users/:userId', favouritesController.getFavouritesBy
 
 router.delete('/api/favourites/:userId/:pokemonId', favouritesController.removeFavouriteById);
 
+router.put('/api/favourites/:userId/:pokemonId', favouritesController.updateFavourite);
+
 export default router;

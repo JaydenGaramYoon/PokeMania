@@ -283,6 +283,9 @@ const Home = () => {
             return;
         }
 
+        // Prompt user for optional memo
+        const memo = prompt(`Enter a memo for ${pokemon.name} (optional):`);
+
         try {
             console.log("[디버그] fetch POST /api/favourites 요청 시작");
 
@@ -294,6 +297,7 @@ const Home = () => {
                 body: JSON.stringify({
                     user: userId,
                     pokemonId: pokemon.id,
+                    memo: memo || '',
                 }),
             });
             console.log("fetch response:", response);
@@ -315,7 +319,7 @@ const Home = () => {
             }
 
             setFavourites(prev => [...prev, pokemon]);
-            alert(`${pokemon.name} added to your Poké Box!`);
+            alert(`${pokemon.name} added to your Favourites!`);
         } catch (error) {
             console.error("Add Favourite Error:", error);
             alert(`Error: ${error.message}`);
