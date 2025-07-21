@@ -28,7 +28,7 @@ app.get("/", (req, res) => {
 
 import messageRoutes from './server/routes/message.routes.js';
 app.use('/api', messageRoutes);
-import profileRoutes from './routes/profile.routes.js';
+import profileRoutes from './server/routes/profile.routes.js';
 app.use('/api/profiles', profileRoutes);
 
 app.listen(config.port, (err) => {
