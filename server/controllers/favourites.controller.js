@@ -71,10 +71,42 @@ const removeFavouriteById = async (req, res) => {
     }
 };
 
+const updateFavourite = async (req, res) => {
+    try {
+        const { userId, pokemonId } = req.params;
+        const { nickname, memo } = req.body;
+        
+        const updatedFavourite = await Favourite.findOneAndUpdate(
+            {
+                user: userId,
+                pokemonId: Number(pokemonId)
+            },
+            {
+                nickname: nickname || '',
+                memo: memo || ''
+            },
+            { new: true } // 업데이트된 문서를 반환
+        );
+        
+        if (!updatedFavourite) {
+            return res.status(404).json({
+                error: "Favourite not found"
+            });
+        }
+        
+        res.status(200).json(updatedFavourite);
+    } catch (err) {
+        return res.status(400).json({
+            error: errorHandler.getErrorMessage(err)
+        });
+    }
+};
+
 export default {
     createFavourite,
     getFavouritesById,
     getFavouritesByUser,
     listFavourites,
-    removeFavouriteById
+    removeFavouriteById,
+    updateFavourite
 }
