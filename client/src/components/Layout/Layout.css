@@ -1,5 +1,90 @@
-.logo img {
-  height: 32px;
-  vertical-align: middle;
+/* Layout Container */
+.layout {
+  display: flex;
+  flex-direction: column;
 }
 
+/* Navigation Bar */
+.navbar {
+  background-color: #ffffffea;
+  padding: 15px 0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.nav-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+}
+
+/* Logo */
+.logo img {
+  height: 40px;
+  vertical-align: middle;
+  transition: all 0.3s ease;
+}
+
+.logo .nav-link.active img {
+  animation: logoBounce 2s infinite;
+}
+
+.logo .nav-link.active {
+  color: inherit; /* 로고는 색상 변경 없음 */
+  transform: none; /* 기본 transform 제거 */
+}
+
+@keyframes logoBounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  40% {
+    transform: translateY(-10px) scale(1.05);
+  }
+  60% {
+    transform: translateY(-5px) scale(1.02);
+  }
+}
+
+/* Navigation Links */
+.nav-links {
+  display: flex;
+  gap: 30px;
+  align-items: center;
+}
+
+.nav-link {
+  color: rgb(0, 0, 0);
+  text-decoration: none;
+  font-size: 20px;
+  font-weight: 500;
+  padding: 10px 15px;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+  color: #3498db;
+}
+
+.nav-link.active {
+  color: #3498db;
+  font-weight: 600;
+  transform: scale(1.05);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .nav-content {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .nav-links {
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
