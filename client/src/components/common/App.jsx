@@ -23,7 +23,7 @@ const App = () => {
           textAlign: "center",
           color: "#666",
           fontSize: "11px",
-          backgroundColor: "rgba(248, 249, 250, 0.95)",
+          backgroundColor: "rgba(248, 249, 250, 0.71)",
           backdropFilter: "blur(5px)",
           borderTop: "1px solid rgba(233, 236, 239, 0.8)",
           zIndex: 1000,
