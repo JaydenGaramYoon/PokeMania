@@ -1,5 +1,6 @@
 import { BrowserRouter as Router } from 'react-router-dom';
 import MainRouter from '../../../MainRouter';
+
 const App = () => {
   return (
     <Router>
@@ -20,7 +21,9 @@ const App = () => {
           left: 0,
           right: 0,
           padding: "12px 4px",
-          textAlign: "center",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
           color: "#666",
           fontSize: "11px",
           backgroundColor: "rgba(248, 249, 250, 0.71)",
@@ -29,7 +32,8 @@ const App = () => {
           zIndex: 1000,
           boxShadow: "0 -2px 10px rgba(0,0,0,0.1)"
         }}>
-          © 2025 Centennial College | Bright Bridge | COMP 229 | Fall 2025 | All rights reserved.
+          © 2025 Centennial College | <span><img src="/images/TeamLogo.png" alt="TeamLogo" /></span>
+          Bright Bridge | COMP 229 | Fall 2025 | All rights reserved.
         </footer>
       </div>
     </Router>
