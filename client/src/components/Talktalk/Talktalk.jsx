@@ -71,26 +71,32 @@ const TalkTalk = () => {
     const checkForUpdates = async () => {
       try {
         const res = await fetch(`/api/messages?section=${activeCategory}`);
+
+        if (!res.ok) {
+          const text = await res.text(); // ← 응답이 JSON이 아닐 경우 대비
+          throw new Error(`Unexpected response: ${text}`);
+        }
+
         const data = await res.json();
         const currentMessages = messages[activeCategory] || [];
         const currentCount = messageCount[activeCategory] || 0;
-        
+
         // Check if message count changed (new/deleted messages)
         const countChanged = data.length !== currentCount;
-        
+
         // Check if message content changed (edited messages)
         let contentChanged = false;
         if (data.length === currentMessages.length && data.length > 0) {
           // Create maps for efficient comparison by message ID
           const currentMessagesMap = new Map(currentMessages.map(msg => [msg._id, msg]));
-          
+
           // Check if any message content has changed
           contentChanged = data.some(newMsg => {
             const oldMsg = currentMessagesMap.get(newMsg._id);
             return oldMsg && newMsg.message !== oldMsg.message;
           });
         }
-        
+
         // Update interface if count or content changed
         if (countChanged || contentChanged) {
           setMessages(prev => ({
@@ -140,13 +146,13 @@ const TalkTalk = () => {
           ...prev,
           [activeCategory]: [...(prev[activeCategory] || []), saved]
         }));
-        
+
         // Record the recent message, remove it after 1 minute
         setRecentMessages(prev => [...prev, saved._id]);
         setTimeout(() => {
           setRecentMessages(prev => prev.filter(id => id !== saved._id));
         }, 1 * 60 * 1000); // 1 minute
-        
+
         setInput('');
       } else {
         const errorData = await res.json();
@@ -182,10 +188,10 @@ const TalkTalk = () => {
           ...prev,
           [activeCategory]: prev[activeCategory].filter(msg => msg._id !== messageId)
         }));
-        
+
         // Remove from recent messages
         setRecentMessages(prev => prev.filter(id => id !== messageId));
-        
+
         alert('Message deleted successfully!');
       } else {
         const errorData = await res.json();
@@ -212,7 +218,7 @@ const TalkTalk = () => {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           sender: userName,
           message: editInput
         })
@@ -223,15 +229,15 @@ const TalkTalk = () => {
         // Update the message in current category
         setMessages(prev => ({
           ...prev,
-          [activeCategory]: prev[activeCategory].map(msg => 
+          [activeCategory]: prev[activeCategory].map(msg =>
             msg._id === messageId ? updatedMessage : msg
           )
         }));
-        
+
         // Exit edit mode
         setEditingMessage(null);
         setEditInput('');
-        
+
         alert('Message edited successfully!');
       } else {
         const errorData = await res.json();
@@ -259,19 +265,19 @@ const TalkTalk = () => {
   const canEditMessage = (message) => {
     const user = localStorage.getItem('user');
     const userName = user ? JSON.parse(user).name : 'Guest';
-    
+
     // Only the sender can edit their own messages
     if (message.sender !== userName) return false;
-    
+
     // Only messages in recentMessages can be edited
     if (!recentMessages.includes(message._id)) return false;
-    
+
     // Check if within 1 minute
     const messageTime = new Date(message.timestamp);
     const currentTime = new Date();
     const timeDifference = currentTime - messageTime;
     const oneMinute = 1 * 60 * 1000;
-    
+
     return timeDifference <= oneMinute;
   };
 
@@ -279,19 +285,19 @@ const TalkTalk = () => {
   const canDeleteMessage = (message) => {
     const user = localStorage.getItem('user');
     const userName = user ? JSON.parse(user).name : 'Guest';
-    
+
     // Only the sender can delete their own messages
     if (message.sender !== userName) return false;
-    
+
     // Only messages in recentMessages can be deleted
     if (!recentMessages.includes(message._id)) return false;
-    
+
     // Check if within 1 minute
     const messageTime = new Date(message.timestamp);
     const currentTime = new Date();
     const timeDifference = currentTime - messageTime;
     const oneMinute = 1 * 60 * 1000;
-    
+
     return timeDifference <= oneMinute;
   };
 
@@ -327,7 +333,7 @@ const TalkTalk = () => {
                 {editingMessage === msg._id ? (
                   // Edit mode
                   <>
-                    <strong className="username">{msg.sender}</strong>: 
+                    <strong className="username">{msg.sender}</strong>:
                     <input
                       type="text"
                       value={editInput}
@@ -340,14 +346,14 @@ const TalkTalk = () => {
                       autoFocus
                     />
                     <div className="timestamp">{formatTimestamp(msg.timestamp)}</div>
-                    <button 
+                    <button
                       onClick={() => handleEditMessage(msg._id)}
                       className="save-edit-button"
                       title="Save changes (Enter)"
                     >
                       ✓
                     </button>
-                    <button 
+                    <button
                       onClick={cancelEdit}
                       className="cancel-edit-button"
                       title="Cancel editing (Esc)"
@@ -362,8 +368,8 @@ const TalkTalk = () => {
                     <div className="timestamp">{formatTimestamp(msg.timestamp)}</div>
                     {/* Edit button - positioned left of delete button */}
                     {canEditMessage(msg) && (
-                      <button 
-                        className="edit-button" 
+                      <button
+                        className="edit-button"
                         onClick={() => startEditMessage(msg)}
                         title="Edit message (within 1 minute)"
                       >
@@ -372,8 +378,8 @@ const TalkTalk = () => {
                     )}
                     {/* Delete button - maintains original position */}
                     {canDeleteMessage(msg) && (
-                      <button 
-                        className="delete-button" 
+                      <button
+                        className="delete-button"
                         onClick={() => handleDeleteMessage(msg._id)}
                         title="Delete message (within 1 minute)"
                       >
