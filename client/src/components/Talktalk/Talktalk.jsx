@@ -70,7 +70,7 @@ const TalkTalk = () => {
   useEffect(() => {
     const checkForUpdates = async () => {
       try {
-        const res = await fetch(`/api/messages?section=${activeCategory}`);
+        const res = await fetch(`/messages?section=${activeCategory}`);
 
         if (!res.ok) {
           const text = await res.text(); // ← 응답이 JSON이 아닐 경우 대비
@@ -133,7 +133,7 @@ const TalkTalk = () => {
     };
 
     try {
-      const res = await fetch('/api/messages', {
+      const res = await fetch('/messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -175,7 +175,7 @@ const TalkTalk = () => {
     const userName = user ? JSON.parse(user).name : 'Guest';
 
     try {
-      const res = await fetch(`/api/messages/${messageId}`, {
+      const res = await fetch(`/messages/${messageId}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -214,7 +214,7 @@ const TalkTalk = () => {
     const userName = user ? JSON.parse(user).name : 'Guest';
 
     try {
-      const res = await fetch(`/api/messages/${messageId}`, {
+      const res = await fetch(`/messages/${messageId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
