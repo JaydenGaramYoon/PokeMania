@@ -13,6 +13,13 @@ import profileRoutes from './routes/profile.routes.js';
 
 const app = express();
 
+import path from "path";
+import { fileURLToPath } from "url";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const CURRENT_WORKING_DIR = process.cwd();
+app.use(express.static(path.join(CURRENT_WORKING_DIR, "dist/app")));
+
 // ✅ Apply CORS at the top
 app.use(cors({
   origin: 'http://localhost:5173',
@@ -25,7 +32,50 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(compress());
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        connectSrc: [
+          "'self'",
+          "https://pokeapi.co",
+          "https://pokemania-wvyd.onrender.com"
+        ],
+        imgSrc: [
+          "'self'",
+          "data:",
+          "https://raw.githubusercontent.com",
+          "https://pokeapi.co",
+          "https://wallpapercave.com",
+          "https://images.seeklogo.com"
+        ],
+        scriptSrc: [
+          "'self'",
+          "https://pokemania-wvyd.onrender.com",
+          "'unsafe-inline'"
+        ],
+        styleSrc: [
+          "'self'",
+          "https://pokemania-wvyd.onrender.com",
+          "https://fonts.googleapis.com",
+          "https://fonts.cdnfonts.com",
+          "'unsafe-inline'"
+        ],
+        fontSrc: [
+          "'self'",
+          "https://fonts.gstatic.com",
+          "https://fonts.cdnfonts.com"
+        ],
+      },
+    },
+  })
+);
+
+// Serve static files from the React app build directory (dist/app)
+app.use(express.static(path.join(__dirname, '../client/public')));
+app.use(express.static(path.join(__dirname, '../client/dist/app')));
+
 
 // ✅ Register routes AFTER CORS is enabled
 app.use('/', userRoutes);
@@ -44,4 +94,8 @@ app.use((err, req, res, next) => {
   }
 });
 
+// Handle React routing, return all requests to React app
+app.get(/.*/, (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/dist/app', 'index.html'));
+});
 export default app;

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import './TalkTalk.css';
+import './Talktalk.css';
 
 const categories = ['General', 'Guides', 'FanArt', 'Events'];
 

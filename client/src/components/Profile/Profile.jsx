@@ -334,7 +334,7 @@ const Profile = () => {
     const fetchUserInfo = async () => {
       if (!userId) return;
       try {
-        const res = await fetch(`http://localhost:3000/api/users/${userId}`, {
+        const res = await fetch(`https://pokemania-wvyd.onrender.com/api/users/${userId}`, {
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
@@ -357,7 +357,7 @@ const Profile = () => {
   const handleDeleteAccount = async () => {
     if (!window.confirm('Are you sure you want to delete your account?')) return;
     try {
-      const res = await fetch(`http://localhost:3000/api/users/${userId}`, {
+      const res = await fetch(`http://000/api/users/${userId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -379,7 +379,7 @@ const Profile = () => {
   // 비밀번호 변경
   const handleChangePassword = async (newPassword) => {
     try {
-      const res = await fetch(`http://localhost:3000/api/users/${userId}/password`, {
+      const res = await fetch(`https://pokemania-wvyd.onrender.com/api/users/${userId}/password`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

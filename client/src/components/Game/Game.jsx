@@ -353,7 +353,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import './game.css';
+import './Game.css';
 import { use } from 'react';
 
 const Game = () => {
