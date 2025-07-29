@@ -58,7 +58,14 @@ app.use(
         styleSrc: [
           "'self'",
           "https://pokemania-wvyd.onrender.com",
+          "https://fonts.googleapis.com",
+          "https://fonts.cdnfonts.com",
           "'unsafe-inline'"
+        ],
+        fontSrc: [
+          "'self'",
+          "https://fonts.gstatic.com",
+          "https://fonts.cdnfonts.com"
         ],
       },
     },
