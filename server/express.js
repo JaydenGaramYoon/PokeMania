@@ -10,6 +10,7 @@ import authRoutes from './routes/auth.routes.js';
 import gameRoutes from './routes/game.routes.js';
 import favouritesRoutes from './routes/favourites.routes.js';
 import profileRoutes from './routes/profile.routes.js';
+import messageRoutes from './routes/message.routes.js';
 
 const app = express();
 
@@ -83,6 +84,7 @@ app.use('/', authRoutes);
 app.use('/', gameRoutes);
 app.use('/', favouritesRoutes);
 app.use('/', profileRoutes);
+app.use('/', messageRoutes);
 
 // ✅ Error handler
 app.use((err, req, res, next) => {
