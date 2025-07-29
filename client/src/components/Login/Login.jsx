@@ -20,7 +20,7 @@ const Login = () => {
     e.preventDefault();
 
     try {
-      const res = await fetch('http://localhost:3000/auth/signin', {
+      const res = await fetch('https://pokemania-wvyd.onrender.com/auth/signin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -41,7 +41,7 @@ const Login = () => {
 
   const handleSignup = async () => {
     try {
-      const res = await fetch('http://localhost:3000/api/users', {
+      const res = await fetch('https://pokemania-wvyd.onrender.com/api/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(signupData)
