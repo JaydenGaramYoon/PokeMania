@@ -19,7 +19,6 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const CURRENT_WORKING_DIR = process.cwd();
-app.use(express.static(path.join(CURRENT_WORKING_DIR, "dist/app")));
 
 // ✅ Apply CORS at the top
 app.use(cors({
@@ -73,18 +72,23 @@ app.use(
   })
 );
 
-// Serve static files from the React app build directory (dist/app)
+// Serve static files from the React app build directory (dist)
 app.use(express.static(path.join(__dirname, '../client/public')));
-app.use(express.static(path.join(__dirname, '../client/dist/app')));
+app.use(express.static(path.join(__dirname, '../client/dist')));
 
-
+app.use('/api/users', userRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/game', gameRoutes);
+app.use('/api/favourites', favouritesRoutes);
+app.use('/api/profiles', profileRoutes);
+app.use('/api', messageRoutes);
 // ✅ Register routes AFTER CORS is enabled
-app.use('/', userRoutes);
-app.use('/', authRoutes);
-app.use('/', gameRoutes);
-app.use('/', favouritesRoutes);
-app.use('/', profileRoutes);
-app.use('/', messageRoutes);
+// app.use('/', userRoutes);
+// app.use('/', authRoutes);
+// app.use('/', gameRoutes);
+// app.use('/', favouritesRoutes);
+// app.use('/', profileRoutes);
+// app.use('/', messageRoutes);
 
 // ✅ Error handler
 app.use((err, req, res, next) => {
@@ -98,6 +102,6 @@ app.use((err, req, res, next) => {
 
 // Handle React routing, return all requests to React app
 app.get(/.*/, (req, res) => {
-  res.sendFile(path.join(__dirname, '../client/dist/app', 'index.html'));
+  res.sendFile(path.join(__dirname, '../client/dist', 'index.html'));
 });
 export default app;
