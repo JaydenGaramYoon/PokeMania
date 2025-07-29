@@ -40,7 +40,7 @@ app.use(
         connectSrc: [
           "'self'",
           "https://pokeapi.co",
-          "http://localhost:3000"
+          "https://pokemania-wvyd.onrender.com"
         ],
         imgSrc: [
           "'self'",
@@ -49,6 +49,16 @@ app.use(
           "https://pokeapi.co",
           "https://wallpapercave.com",
           "https://images.seeklogo.com"
+        ],
+        scriptSrc: [
+          "'self'",
+          "https://pokemania-wvyd.onrender.com",
+          "'unsafe-inline'"
+        ],
+        styleSrc: [
+          "'self'",
+          "https://pokemania-wvyd.onrender.com",
+          "'unsafe-inline'"
         ],
       },
     },
