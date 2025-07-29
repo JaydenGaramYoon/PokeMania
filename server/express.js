@@ -37,7 +37,11 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        connectSrc: ["'self'", "https://pokeapi.co"],
+        connectSrc: [
+          "'self'",
+          "https://pokeapi.co",
+          "http://localhost:3000"
+        ],
         imgSrc: [
           "'self'",
           "data:",
