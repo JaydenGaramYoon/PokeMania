@@ -23,7 +23,11 @@ app.use(express.static(path.join(CURRENT_WORKING_DIR, "dist/app")));
 
 // ✅ Apply CORS at the top
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: [
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'https://pokemania-wvyd.onrender.com'
+  ],
   credentials: true
 }));
 
