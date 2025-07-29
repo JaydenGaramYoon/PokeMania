@@ -24,7 +24,7 @@ mongoose.connection.on('error', () => {
 
 // ✅ apply CORS before anything else
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: 'https://pokemania-wvyd.onrender.com',
   credentials: true
 }));
 
