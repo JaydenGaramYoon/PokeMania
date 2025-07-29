@@ -1,7 +1,13 @@
 import config from './server/config/config.js';
 import app from './server/express.js';
 import mongoose from 'mongoose';
-import cors from 'cors'; // ✅ added this line
+import cors from 'cors'; // ✅ added this line''
+
+// to ensure the server starts correctly
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server started on port ${PORT}`);
+});
 
 mongoose.Promise = global.Promise;
 mongoose.connect(config.mongoUri, {
