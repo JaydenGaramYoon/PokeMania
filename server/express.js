@@ -73,6 +73,13 @@ app.use(
   })
 );
 
+// ✅ Register routes AFTER CORS is enabled
+app.use('/', userRoutes);
+app.use('/', authRoutes);
+app.use('/', gameRoutes);
+app.use('/', favouritesRoutes);
+app.use('/', profileRoutes);
+app.use('/', messageRoutes);
 // Serve static files from the React app build directory (dist/app)
 app.use(express.static(path.join(__dirname, '../client/public')));
 app.use(express.static(path.join(__dirname, '../client/dist/app')));
@@ -83,13 +90,6 @@ app.use(express.static(path.join(__dirname, '../client/dist/app')));
 // app.use('/api/favourites', favouritesRoutes);
 // app.use('/api/profiles', profileRoutes);
 // app.use('/api', messageRoutes);
-// ✅ Register routes AFTER CORS is enabled
-app.use('/', userRoutes);
-app.use('/', authRoutes);
-app.use('/', gameRoutes);
-app.use('/', favouritesRoutes);
-app.use('/', profileRoutes);
-app.use('/', messageRoutes);
 
 // ✅ Error handler
 app.use((err, req, res, next) => {
