@@ -136,7 +136,7 @@ app.use((err, req, res, next) => {
 });
 
 // Handle React routing, return all requests to React app
-app.get(/.*/, (req, res) => {
+app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../client/dist/app', 'index.html'));
 });
 export default app;
