@@ -1,5 +1,5 @@
   // 환경에 따라 API 주소 자동 설정
-  const API_BASE = window.location.hostname === 'localhost' ? '' : 'https://pokemania-wvyd.onrender.com';
+const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:3000' : 'https://pokemania-wvyd.onrender.com';
 // // import React, { useState } from 'react';
 // // import styles from './Profile.module.css';
 // // import { useEffect } from 'react';
@@ -973,6 +973,41 @@ const Profile = () => {
       alert('Error occurred while deleting account');
     }
   };
+
+  // Admin toggle functionality
+  const handleToggleAdmin = async () => {
+    if (!userInfo) return;
+    
+    const newRole = userInfo.role === 'admin' ? 'user' : 'admin';
+    
+    try {
+      const res = await fetch(`${API_BASE}/api/users/${userId}/role`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ role: newRole })
+      });
+
+      if (res.ok) {
+        const updatedUser = await res.json();
+        setUserInfo(updatedUser);
+        
+        // Update localStorage with new role
+        const currentUser = JSON.parse(localStorage.getItem('user'));
+        currentUser.role = newRole;
+        localStorage.setItem('user', JSON.stringify(currentUser));
+        
+        alert(`Role changed to ${newRole} successfully!`);
+      } else {
+        alert('Failed to change role');
+      }
+    } catch (error) {
+      console.error('Error changing role:', error);
+      alert('Error occurred while changing role');
+    }
+  };
   // 비밀번호 변경
   const handleChangePassword = async (newPassword) => {
     try {
@@ -1081,14 +1116,29 @@ const Profile = () => {
                 <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                   <li><strong>Name:</strong> {userInfo.name}</li>
                   <li><strong>Email:</strong> {userInfo.email}</li>
+                  <li><strong>Role:</strong> {userInfo.role || 'user'}</li>
                   <li><strong>Created:</strong> {new Date(userInfo.created).toLocaleString()}</li>
                   <li><strong>Updated:</strong> {new Date(userInfo.updated).toLocaleString()}</li>
                 </ul>
-                <button className={`${styles.button} ${styles.buttonDanger}`} onClick={handleDeleteAccount}>Delete Account</button><ChangePasswordForm onChangePassword={handleChangePassword} />
+                
+                {/* Admin Toggle Button */}
+                <div style={{ marginTop: '1rem', marginBottom: '1rem' }}>
+                  <button 
+                    className={`${styles.button} ${userInfo.role === 'admin' ? styles.buttonSuccess : styles.buttonPrimary}`}
+                    onClick={handleToggleAdmin}
+                    style={{ marginRight: '10px' }}
+                  >
+                    {userInfo.role === 'admin' ? '👑 Remove Admin' : '🔧 Make Admin'}
+                  </button>
+                </div>
+                
+                <button className={`${styles.button} ${styles.buttonDanger}`} onClick={handleDeleteAccount}>Delete Account</button>
+                <ChangePasswordForm onChangePassword={handleChangePassword} />
               </div>
             </div>
             <div className={styles.modalActions}>
-              <button className={`${styles.button} ${styles.buttonSecondary}`} onClick={() => setIsAccountModalOpen(false)}>Close</button>            </div>
+              <button className={`${styles.button} ${styles.buttonSecondary}`} onClick={() => setIsAccountModalOpen(false)}>Close</button>            
+            </div>
           </div>
         </div>
       )}

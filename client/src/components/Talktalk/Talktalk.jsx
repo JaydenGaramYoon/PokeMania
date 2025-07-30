@@ -3,11 +3,15 @@ import './Talktalk.css';
 
 const categories = ['General', 'Guides', 'FanArt', 'Events'];
 
+// API base URL configuration
+const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:3000' : 'https://pokemania-wvyd.onrender.com';
+
 const TalkTalk = () => {
   const [activeCategory, setActiveCategory] = useState('General');
   const [messages, setMessages] = useState({});
   const [input, setInput] = useState('');
   const [username, setUsername] = useState('Guest');
+  const [userRole, setUserRole] = useState('user'); // track current user's role
   const [recentMessages, setRecentMessages] = useState([]); // record recently sent messages
   const [editingMessage, setEditingMessage] = useState(null); // track which message is being edited
   const [editInput, setEditInput] = useState(''); // input for editing message
@@ -30,14 +34,13 @@ const TalkTalk = () => {
     const fetchUsername = async () => {
       try {
         const user = localStorage.getItem('user');
-        const userName = user ? JSON.parse(user).name : 'Guest';
-        console.log('Current user:', userName);
-        // const res = await fetch('/api/users/me', {
-        //   credentials: 'include'
-        // });
-        // if (res.ok) {
-        //   const user = await res.json();
-        setUsername(userName || 'Guest');
+        const userData = user ? JSON.parse(user) : null;
+        const userName = userData?.name || 'Guest';
+        const role = userData?.role || 'user';
+        
+        console.log('Current user:', userName, 'Role:', role);
+        setUsername(userName);
+        setUserRole(role);
       }
       catch (err) {
         console.error('Failed to fetch user info:', err);
@@ -49,7 +52,7 @@ const TalkTalk = () => {
   useEffect(() => {
     const fetchMessages = async () => {
       try {
-        const res = await fetch(`/api/messages?section=${activeCategory}`);
+        const res = await fetch(`${API_BASE}/messages?section=${activeCategory}`);
         const data = await res.json();
         setMessages(prev => ({
           ...prev,
@@ -70,7 +73,7 @@ const TalkTalk = () => {
   useEffect(() => {
     const checkForUpdates = async () => {
       try {
-        const res = await fetch(`/messages?section=${activeCategory}`);
+        const res = await fetch(`${API_BASE}/messages?section=${activeCategory}`);
 
         if (!res.ok) {
           const text = await res.text(); // ← 응답이 JSON이 아닐 경우 대비
@@ -133,7 +136,7 @@ const TalkTalk = () => {
     };
 
     try {
-      const res = await fetch('/messages', {
+      const res = await fetch(`${API_BASE}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -175,7 +178,7 @@ const TalkTalk = () => {
     const userName = user ? JSON.parse(user).name : 'Guest';
 
     try {
-      const res = await fetch(`/messages/${messageId}`, {
+      const res = await fetch(`${API_BASE}/messages/${messageId}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -214,7 +217,7 @@ const TalkTalk = () => {
     const userName = user ? JSON.parse(user).name : 'Guest';
 
     try {
-      const res = await fetch(`/messages/${messageId}`, {
+      const res = await fetch(`${API_BASE}/messages/${messageId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -261,10 +264,15 @@ const TalkTalk = () => {
     setEditInput('');
   };
 
-  // check if the message can be edited (same time limit as delete - 1 minute)
+  // check if the message can be edited (1 minute for own messages, always for admin)
   const canEditMessage = (message) => {
     const user = localStorage.getItem('user');
-    const userName = user ? JSON.parse(user).name : 'Guest';
+    const userData = user ? JSON.parse(user) : null;
+    const userName = userData?.name || 'Guest';
+    const role = userData?.role || 'user';
+
+    // Admin can edit any message
+    if (role === 'admin') return true;
 
     // Only the sender can edit their own messages
     if (message.sender !== userName) return false;
@@ -281,10 +289,15 @@ const TalkTalk = () => {
     return timeDifference <= oneMinute;
   };
 
-  // check if the message can be deleted
+  // check if the message can be deleted (1 minute for own messages, always for admin)
   const canDeleteMessage = (message) => {
     const user = localStorage.getItem('user');
-    const userName = user ? JSON.parse(user).name : 'Guest';
+    const userData = user ? JSON.parse(user) : null;
+    const userName = userData?.name || 'Guest';
+    const role = userData?.role || 'user';
+
+    // Admin can delete any message
+    if (role === 'admin') return true;
 
     // Only the sender can delete their own messages
     if (message.sender !== userName) return false;
@@ -307,7 +320,10 @@ const TalkTalk = () => {
         <img src="/images/pokeball.png" alt="logo" className="chat-logo" />
         PokéChat Forums
       </h2>
-      <div className="chat-user">Logged in as: <strong>{username}</strong></div>
+      <div className="chat-user">
+        Logged in as: <strong>{username}</strong>
+        {userRole === 'admin' && <span style={{ color: '#gold', marginLeft: '10px' }}>👑 Admin</span>}
+      </div>
       <div className="category-tabs">
         {categories.map((cat, index) => (
           <button
@@ -371,7 +387,7 @@ const TalkTalk = () => {
                       <button
                         className="edit-button"
                         onClick={() => startEditMessage(msg)}
-                        title="Edit message (within 1 minute)"
+                        title={userRole === 'admin' ? "Edit message (Admin)" : "Edit message (within 1 minute)"}
                       >
                         ✏️
                       </button>
@@ -381,7 +397,7 @@ const TalkTalk = () => {
                       <button
                         className="delete-button"
                         onClick={() => handleDeleteMessage(msg._id)}
-                        title="Delete message (within 1 minute)"
+                        title={userRole === 'admin' ? "Delete message (Admin)" : "Delete message (within 1 minute)"}
                       >
                         &#10006;
                       </button>

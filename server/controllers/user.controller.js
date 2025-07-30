@@ -97,4 +97,32 @@ export const changePassword = async (req, res) => {
   }
 };
 
-export default { create, userByID, read, list, remove, update, changePassword }
+export const updateRole = async (req, res) => {
+  const { userId } = req.params;
+  const { role } = req.body;
+  
+  if (!role || !['user', 'admin'].includes(role)) {
+    return res.status(400).json({ error: 'Invalid role. Must be "user" or "admin"' });
+  }
+  
+  try {
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    user.role = role;
+    user.updated = Date.now();
+
+    await user.save();
+
+    // Return user without sensitive data
+    user.hashed_password = undefined;
+    user.salt = undefined;
+    
+    res.json(user);
+  } catch (err) {
+    console.error('Error updating user role:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+export default { create, userByID, read, list, remove, update, changePassword, updateRole }
