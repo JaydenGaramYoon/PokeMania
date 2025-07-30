@@ -65,16 +65,6 @@ app.use((err, req, res, next) => {
   }
 });
 
-// Simple catch-all route
-app.get('*', (req, res) => {
-  const indexPath = path.join(__dirname, '../client/dist/app', 'index.html');
-  console.log('Serving index.html from:', indexPath);
-  res.sendFile(indexPath, (err) => {
-    if (err) {
-      console.error('Error serving index.html:', err);
-      res.status(500).send('Error loading page');
-    }
-  });
-});
+// NO catch-all route for now - will handle via static files
 
 export default app;

@@ -7,8 +7,8 @@ router.route('/api/game').post(gameCtrl.create);
 
 router.route('/api/game/user/:userId').get(gameCtrl.getScore);
 
-router.put('/api/game/:gameId', gameCtrl.updateScore);
-
-router.route('/api/game/:gameId').delete(gameCtrl.removeScore);
+router.route('/api/game/:gameId')
+  .put(gameCtrl.updateScore)
+  .delete(gameCtrl.removeScore);
 
 export default router;
