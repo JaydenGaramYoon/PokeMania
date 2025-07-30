@@ -23,13 +23,32 @@ app.use(express.static(path.join(CURRENT_WORKING_DIR, "dist/app")));
 
 // ✅ Apply CORS at the top
 app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'http://localhost:3000',
-    'https://pokemania-wvyd.onrender.com',
-    'https://pokemania-saau.onrender.com'
-  ],
-  credentials: true
+  origin: function (origin, callback) {
+    // Allow requests with no origin (mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = [
+      'http://localhost:5173',
+      'http://localhost:3000',
+      'https://pokemania-wvyd.onrender.com',
+      'https://pokemania-saau.onrender.com'
+    ];
+    
+    // In production, check allowed origins more flexibly
+    if (process.env.NODE_ENV === 'production') {
+      if (allowedOrigins.includes(origin) || origin.includes('onrender.com')) {
+        return callback(null, true);
+      } else {
+        return callback(new Error('Not allowed by CORS'));
+      }
+    } else {
+      // In development, allow all origins
+      return callback(null, true);
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 
 app.use(express.json());
