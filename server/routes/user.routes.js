@@ -17,9 +17,6 @@ router.route('/api/users/:userId')
     .delete(authCtrl.requireSignin, authCtrl.hasAuthorization,
         userCtrl.remove)
 router.param('userId', userCtrl.userByID)
-router.route('/api/users/:userId').get(userCtrl.read)
-router.route('/api/users/:userId').put(userCtrl.update)
-router.route('/api/users/:userId').delete(userCtrl.remove)
 router.route('/api/users/:userId/password').put(authCtrl.requireSignin, authCtrl.hasAuthorization, userCtrl.changePassword)
 router.route('/api/users/:userId/role').put(authCtrl.requireSignin, authCtrl.hasAuthorization, userCtrl.updateRole)
 export default router
