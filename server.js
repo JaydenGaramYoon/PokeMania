@@ -16,31 +16,31 @@ mongoose.connection.on('error', () => {
   throw new Error(`unable to connect to database: ${config.mongoUri}`);
 });
 
-// ✅ apply CORS before anything else
+// ✅ apply CORS before anything else - Simplified for Render deployment
 const allowedOrigins = process.env.NODE_ENV === 'production' 
   ? ['https://pokemania-wvyd.onrender.com', 'https://pokemania-saau.onrender.com'] 
   : ['http://localhost:5173', 'http://localhost:3000'];
 
 app.use(cors({
   origin: function (origin, callback) {
+    console.log('Server.js CORS origin check:', origin, 'NODE_ENV:', process.env.NODE_ENV);
+    
     // Allow requests with no origin (mobile apps, curl, etc.)
     if (!origin) return callback(null, true);
     
-    // In production, check allowed origins
-    if (process.env.NODE_ENV === 'production') {
-      if (allowedOrigins.includes(origin) || origin.includes('onrender.com')) {
-        return callback(null, true);
-      } else {
-        return callback(new Error('Not allowed by CORS'));
-      }
-    } else {
-      // In development, allow all origins
+    // Allow all onrender.com origins or localhost
+    if (allowedOrigins.includes(origin) || origin.includes('onrender.com') || origin.includes('localhost')) {
       return callback(null, true);
+    } else {
+      console.log('Server.js CORS blocked origin:', origin);
+      return callback(new Error('Not allowed by CORS'));
     }
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'HEAD'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  preflightContinue: false,
+  optionsSuccessStatus: 200
 }));
 
 app.get("/", (req, res) => {
