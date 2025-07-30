@@ -18,7 +18,7 @@ mongoose.connection.on('error', () => {
 
 // ✅ apply CORS before anything else
 const allowedOrigins = process.env.NODE_ENV === 'production' 
-  ? ['https://pokemania-wvyd.onrender.com'] 
+  ? ['https://pokemania-wvyd.onrender.com', 'https://pokemania-saau.onrender.com'] 
   : ['http://localhost:5173', 'http://localhost:3000'];
 
 app.use(cors({

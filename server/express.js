@@ -26,7 +26,8 @@ app.use(cors({
   origin: [
     'http://localhost:5173',
     'http://localhost:3000',
-    'https://pokemania-wvyd.onrender.com'
+    'https://pokemania-wvyd.onrender.com',
+    'https://pokemania-saau.onrender.com'
   ],
   credentials: true
 }));
