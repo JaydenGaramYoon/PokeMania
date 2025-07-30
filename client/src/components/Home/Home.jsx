@@ -231,6 +231,7 @@ const Home = () => {
             })
             .filter(Boolean);
         setFavourites(storedFavourites);
+
     }, []);
 
     const handleSearch = async () => {
@@ -340,6 +341,10 @@ const Home = () => {
 
     return (
         <>
+            {/* CI/CD Test Paragraph */}
+            <div style={{ textAlign: 'center', margin: '24px 0', fontSize: '18px', color: '#333' }}>
+                CI/CD Test: This is a test paragraph to verify the CI/CD pipeline.
+            </div>
             <div className="search-area">
                 <input
                     type="text"
