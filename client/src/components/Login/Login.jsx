@@ -151,7 +151,7 @@ const Login = () => {
   });
 
   // 환경에 따라 API 주소 자동 설정
-  const API_BASE = window.location.hostname === 'localhost' ? '' : 'https://pokemania-wvyd.onrender.com';
+  const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:3000' : 'https://pokemania-wvyd.onrender.com';
 
   const handleLogin = async (e) => {
     e.preventDefault();
