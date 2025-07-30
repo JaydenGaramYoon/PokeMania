@@ -11,7 +11,6 @@ node_modules/
 client/node_modules/
 client/dist-ssr/
 client/*.local
-dist/
 dist-ssr/
 *.local
 
