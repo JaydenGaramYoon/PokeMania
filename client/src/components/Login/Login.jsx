@@ -32,25 +32,11 @@ const Login = () => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Login failed');
 
-      // Fallback: if role is missing, try to fetch user info from backend
-      let userWithRole = data.user;
-      if (!userWithRole.role) {
-        try {
-          const userRes = await fetch(`${API_BASE}/api/users/me`, { credentials: 'include' });
-          if (userRes.ok) {
-            const userInfo = await userRes.json();
-            userWithRole = { ...userWithRole, ...userInfo };
-          }
-        } catch (e) {
-          // ignore, fallback to original user object
-        }
-      }
-
       localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(userWithRole));
+      localStorage.setItem('user', JSON.stringify(data.user));
       console.log('Token:', data.token);
-      console.log('Login successful:', userWithRole);
-      console.log('Role:', userWithRole.role, '| Full user:', userWithRole);
+      console.log('Login successful:', data.user);
+      console.log('Role:', data.user.role); // Log user role for debugging
       navigate('/home');
     } catch (err) {
       setError(err.message);
@@ -77,37 +63,43 @@ const Login = () => {
 
   return (
     <div className="login-page">
-      <form className="login-form" onSubmit={handleLogin}>
-        <h2>Login</h2>
-        {error && <p className="error-message">{error}</p>}
-
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <img
+          src={process.env.PUBLIC_URL ? process.env.PUBLIC_URL + '/images/appLogo.PNG' : '/images/appLogo.PNG'}
+          alt="PokeMania Logo"
+          style={{ width: '300px', marginBottom: '2rem' }}
         />
+        <form className="login-form" onSubmit={handleLogin}>
+          <h2>Login</h2>
+          {error && <p className="error-message">{error}</p>}
 
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        
-        <button type="submit">Log In</button>
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
 
-        <button
-          type="button"
-          className="signup-link"
-          onClick={() => setShowSignup(true)}
-        >
-          Sign Up
-        </button>
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          
+          <button type="submit">Log In</button>
 
-      </form>
+          <button
+            type="button"
+            className="signup-link"
+            onClick={() => setShowSignup(true)}
+          >
+            Sign Up
+          </button>
+        </form>
+      </div>
 
       {/* ✅ Sign-Up Modal */}
       {showSignup && (
