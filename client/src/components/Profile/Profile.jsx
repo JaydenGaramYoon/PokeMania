@@ -28,25 +28,25 @@ const Profile = () => {
   const [users, setUsers] = useState([]);
 
   // Fetch all users if admin
+  const fetchUsers = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/users`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        console.log('Fetched users:', data); // 추가
+        setUsers(data);
+      }
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    }
+  };
   useEffect(() => {
     if (user && user.role === 'admin') {
-      const fetchUsers = async () => {
-        try {
-          const res = await fetch(`${API_BASE}/api/users`, {
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            }
-          });
-          if (res.ok) {
-            const data = await res.json();
-            console.log('Fetched users:', data); // 추가
-            setUsers(data);
-          }
-        } catch (error) {
-          console.error('Error fetching users:', error);
-        }
-      };
       fetchUsers();
     }
   }, [user, token]);
@@ -63,7 +63,7 @@ const Profile = () => {
         }
       });
       if (res.ok) {
-        setUsers(users => users.filter(u => u._id !== targetUserId));
+        await fetchUsers();
         alert('User deleted successfully.');
       } else {
         alert('Failed to delete user.');
