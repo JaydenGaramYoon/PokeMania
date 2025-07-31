@@ -190,9 +190,7 @@ const Profile = () => {
   // Admin toggle functionality
   const handleToggleAdmin = async () => {
     if (!userInfo) return;
-    
     const newRole = userInfo.role === 'admin' ? 'user' : 'admin';
-    
     try {
       const res = await fetch(`${API_BASE}/api/users/${userId}/role`, {
         method: 'PUT',
@@ -202,17 +200,23 @@ const Profile = () => {
         },
         body: JSON.stringify({ role: newRole })
       });
-
       if (res.ok) {
-        const updatedUser = await res.json();
-        setUserInfo(updatedUser);
-        
         // Update localStorage with new role
         const currentUser = JSON.parse(localStorage.getItem('user'));
         currentUser.role = newRole;
         localStorage.setItem('user', JSON.stringify(currentUser));
-        
         alert(`Role changed to ${newRole} successfully!`);
+        // Refetch userInfo to update UI
+        const userRes = await fetch(`${API_BASE}/api/users/${userId}`, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (userRes.ok) {
+          const updatedUser = await userRes.json();
+          setUserInfo(updatedUser);
+        }
       } else {
         alert('Failed to change role');
       }
@@ -333,18 +337,18 @@ const Profile = () => {
                   <li><strong>Created:</strong> {new Date(userInfo.created).toLocaleString()}</li>
                   <li><strong>Updated:</strong> {new Date(userInfo.updated).toLocaleString()}</li>
                 </ul>
-                
-                {/* Admin Toggle Button */}
-                <div style={{ marginTop: '1rem', marginBottom: '1rem' }}>
-                  <button 
-                    className={`${styles.button} ${userInfo.role === 'admin' ? styles.buttonSuccess : styles.buttonPrimary}`}
-                    onClick={handleToggleAdmin}
-                    style={{ marginRight: '10px' }}
-                  >
-                    {userInfo.role === 'admin' ? '👑 Remove Admin' : '🔧 Make Admin'}
-                  </button>
-                </div>
-                
+                {/* Admin Toggle Button: only show if logged-in user is admin and userInfo.role is admin */}
+                {user && user.role === 'admin' && userInfo.role === 'admin' && (
+                  <div style={{ marginTop: '1rem', marginBottom: '1rem' }}>
+                    <button 
+                      className={`${styles.button} ${styles.buttonSuccess}`}
+                      onClick={handleToggleAdmin}
+                      style={{ marginRight: '10px' }}
+                    >
+                      👑 Remove Admin
+                    </button>
+                  </div>
+                )}
                 <button className={`${styles.button} ${styles.buttonDanger}`} onClick={handleDeleteAccount}>Delete Account</button>
                 <ChangePasswordForm onChangePassword={handleChangePassword} />
               </div>
