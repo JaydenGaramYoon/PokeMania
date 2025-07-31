@@ -369,22 +369,19 @@ const Profile = () => {
                   </td>
                   <td style={{ padding: '8px', display: 'flex', gap: '6px', alignItems: 'center' }}>
                     {u._id === userId ? (
-                      <>
-                        <button
-                          className={styles.myAccountButton}
-                          style={{ padding: '2px 10px', fontSize: '0.95em' }}
-                          onClick={() => setIsAccountModalOpen(true)}
-                        >
-                          My Account
-                        </button>
-                      </>
+                      <button
+                        className={styles.myAccountButton}
+                        style={{ padding: '2px 10px', fontSize: '0.95em' }}
+                        onClick={() => setIsAccountModalOpen(true)}
+                      >
+                        My Account
+                      </button>
                     ) : (
                       <>
                         <button
                           style={{ marginRight: 8, color: 'white', background: '#e74c3c', border: 'none', borderRadius: 4, padding: '2px 10px', cursor: 'pointer' }}
                           onClick={() => handleAdminDeleteUser(u._id)}
-                          disabled={u._id === userId}
-                          title={u._id === userId ? 'You cannot delete yourself' : 'Delete user'}
+                          title='Delete user'
                         >
                           Delete
                         </button>
@@ -393,6 +390,33 @@ const Profile = () => {
                           onClick={() => handleAdminChangeUserPassword(u._id)}
                         >
                           Change PW
+                        </button>
+                        <button
+                          style={{ color: u.role === 'admin' ? '#e67e22' : '#2980b9', background: '#f6f6f6', border: '1px solid #ccc', borderRadius: 4, padding: '2px 10px', cursor: 'pointer', fontWeight: 'bold' }}
+                          onClick={async () => {
+                            const newRole = u.role === 'admin' ? 'user' : 'admin';
+                            try {
+                              const res = await fetch(`${API_BASE}/api/users/${u._id}/role`, {
+                                method: 'PUT',
+                                headers: {
+                                  'Content-Type': 'application/json',
+                                  'Authorization': `Bearer ${token}`
+                                },
+                                body: JSON.stringify({ role: newRole })
+                              });
+                              if (res.ok) {
+                                setUsers(users => users.map(userObj => userObj._id === u._id ? { ...userObj, role: newRole } : userObj));
+                                alert(`Role changed to ${newRole} for ${u.name}`);
+                              } else {
+                                alert('Failed to change role');
+                              }
+                            } catch (error) {
+                              alert('Error occurred while changing role');
+                            }
+                          }}
+                          title={u.role === 'admin' ? 'Remove Admin' : 'Make Admin'}
+                        >
+                          {u.role === 'admin' ? 'Remove Admin' : 'Make Admin'}
                         </button>
                       </>
                     )}
