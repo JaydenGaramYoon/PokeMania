@@ -32,6 +32,7 @@ const Login = () => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Login failed');
 
+      // ✅ Login 시 저장 방식 변경
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
       console.log('Token:', data.token);
@@ -65,7 +66,7 @@ const Login = () => {
     <div className="login-page">
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <img
-          src={process.env.PUBLIC_URL ? process.env.PUBLIC_URL + '/images/appLogo.PNG' : '/images/appLogo.PNG'}
+          src='/images/appLogo.PNG'
           alt="PokeMania Logo"
           style={{ width: '300px', marginBottom: '2rem' }}
         />
@@ -88,7 +89,7 @@ const Login = () => {
             onChange={(e) => setPassword(e.target.value)}
             required
           />
-          
+
           <button type="submit">Log In</button>
 
           <button
