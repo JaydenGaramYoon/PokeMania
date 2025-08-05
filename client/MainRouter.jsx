@@ -65,7 +65,7 @@ import Talktalk from './src/components/Talktalk/Talktalk';
 import Game from './src/components/Game/Game';
 import Login from './src/components/Login/Login';
 import Profile from './src/components/Profile/Profile';
-import ProtectedRoute from './src/components/ProtectedRoute'; 
+import ProtectedRoute from './ProtectedRoute'; 
 
 const MainRouter = () => {
   const location = useLocation();
